@@ -19,12 +19,13 @@ CREATE TABLE tipo (
 DROP TABLE IF EXISTS prodotto;
 CREATE TABLE prodotto (
 	id  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	nome_marca varchar(50) not null, 
     nome varchar(50) not null,
+	nome_marca varchar(50) not null, 
     nome_tipo varchar(50) not null, 
     isDaRicomprare boolean not null,
-    nota varchar(200),
     isPiaciuto boolean,
+    nota varchar(200),
+    immagine blob,
     CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome),
     CONSTRAINT prodotto_marca FOREIGN KEY (nome_marca) REFERENCES marca(nome) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT prodotto_tipo FOREIGN KEY (nome_tipo) REFERENCES tipo(nome) ON DELETE NO ACTION ON UPDATE CASCADE
