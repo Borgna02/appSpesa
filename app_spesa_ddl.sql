@@ -4,7 +4,7 @@ USE spesa;
 
 DROP USER IF EXISTS 'spesaUser'@'localhost';
 CREATE USER 'spesaUser'@'localhost' IDENTIFIED BY 'spesaPwd';
-GRANT select,insert,update,delete,execute ON collectors.* TO 'spesaUser'@'localhost';
+GRANT select,insert,update,delete,execute ON spesa.* TO 'spesaUser'@'localhost';
 
 DROP TABLE IF EXISTS marca;
 CREATE TABLE marca (
@@ -32,7 +32,8 @@ CREATE TABLE prodotto (
 );
 
 DELETE FROM tipo;
-INSERT INTO tipo VALUES ("Biscotti"), ("Merendine"), ("Pasta"), ("Crackers"), ("Cereali"), ("Pane"), ("Farina");
+INSERT INTO tipo VALUES ("Biscotti"), ("Merendine"), ("Pasta"), ("Crackers"), ("Cereali"), ("Pane"), ("Farina"),("Grissini");
 
 DELETE FROM marca;
 INSERT INTO marca VALUES("Scharr"), ("Barilla"), ("De Cecco");
+

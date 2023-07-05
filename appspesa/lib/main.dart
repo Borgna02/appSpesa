@@ -1,4 +1,9 @@
+// ignore_for_file: unused_local_variable
+
+import 'package:appspesa/connection.dart';
 import 'package:flutter/material.dart';
+
+import 'prodotto.dart';
 
 /// Flutter code sample for [AppBar].
 
@@ -12,76 +17,129 @@ class AppBarApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
           colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
-      home: const AppBarExample(),
+      home: const MyAppBar(),
     );
   }
 }
 
-class AppBarExample extends StatelessWidget {
-  const AppBarExample({super.key});
+class MyAppBar extends StatelessWidget {
+  const MyAppBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
-    const int tabsCount = 6;
-    List<String> titles = <String>[
-      'Pane',
-      'Pizza',
-      'Pasta',
-      'Crackers',
-      'Merendine',
-      'Cereali',
-    ];
+    Future<Widget> buildTabBar() async {
+      final conn = await connectToDatabase();
 
-    return DefaultTabController(
-      initialIndex: 1,
-      length: tabsCount,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('AppBar Sample'),
-          // This check specifies which nested Scrollable's scroll notification
-          // should be listened to.
-          //
-          // When `ThemeData.useMaterial3` is true and scroll view has
-          // scrolled underneath the app bar, this updates the app bar
-          // background color and elevation.
-          //
-          // This sets `notification.depth == 1` to listen to the scroll
-          // notification from the nested `ListView.builder`.
-          notificationPredicate: (ScrollNotification notification) {
-            return notification.depth == 1;
-          },
-          // The elevation value of the app bar when scroll view has
-          // scrolled underneath the app bar.
-          scrolledUnderElevation: 4.0,
-          shadowColor: Theme.of(context).shadowColor,
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: <Widget>[
-              Tab(
-                text: titles[0],
-              ),
-              Tab(
-                text: titles[1],
-              ),
-              Tab(
-                text: titles[2],
-              ),
-              Tab(
-                text: titles[3],
-              ),
-              Tab(
-                text: titles[4],
-              ),
-              Tab(
-                text: titles[5],
-              ),
-            ],
+      // Esegue la query per ottenere i dati dal database
+      var results = await conn.execute('SELECT * FROM tipo');
+      List<Widget> tabWidgets = [];
+      Map<String, List<Prodotto>> prodotti = {};
+      for (var row in results.rows) {
+        String? value = row.colAt(0);
+        if (value != null) {
+          List<Prodotto> prodottiList = [];
+          var otherResult = await conn.execute(
+              'SELECT * FROM prodotto WHERE nome_tipo = :tipo',
+              {'tipo': value});
+
+          for (var prodotto in otherResult.rows) {
+            int idProdotto = int.parse(prodotto.colAt(0) as String);
+            String nomeProdotto = prodotto.colAt(1) as String;
+            String nomeMarca = prodotto.colAt(2) as String;
+            String nomeTipo = value;
+            bool isDaRicomprare = (prodotto.colAt(4) == 'true');
+            bool isPiaciuto = (prodotto.colAt(5) == 'true');
+            String? nota = prodotto.colAt(6);
+
+            prodottiList.add(Prodotto(
+                id: idProdotto,
+                nome: nomeProdotto,
+                nomeMarca: nomeMarca,
+                nomeTipo: nomeTipo,
+                isDaRicomprare: isDaRicomprare,
+                isPiaciuto: isPiaciuto,
+                nota: nota));
+          }
+
+          prodotti[value] = prodottiList;
+
+          // Aggiunge una Tab per ogni valore ottenuto dalla query
+          tabWidgets.add(
+            Tab(
+              text: value,
+            ),
+          );
+        }
+      }
+
+      // Ottiene il colore del tema corrente
+      final ColorScheme colorScheme = Theme.of(context).colorScheme;
+      final int tabsCount = tabWidgets.length;
+
+      await conn.close();
+      print('Disconnected from database');
+
+      // Costruisce la TabBar utilizzando i dati ottenuti dalla query
+      return DefaultTabController(
+        initialIndex: 1,
+        length: tabsCount,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Spesa'),
+
+            // Imposta il predicate per mostrare la notifica solo quando lo scroll è a profondità 1
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+            // L'elevazione dell'app bar quando lo scroll view è sotto di essa
+            scrolledUnderElevation: 2.0,
+            // Colore dell'ombra dell'app bar
+            // ignore: use_build_context_synchronously
+            shadowColor: Theme.of(context).shadowColor,
+            // TabBar con le Tab generate dalla query
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabWidgets,
+            ),
           ),
+          // body: TabBarView(
+          //   children: <Widget>[
+          //     // ListView.builder(itemBuilder: itemBuilder),
+          //   ],
+          // )
         ),
-      ),
+      );
+    }
+
+    // Utilizza il FutureBuilder per gestire l'asincronicità della costruzione della TabBar
+    return FutureBuilder<Widget>(
+      future: buildTabBar(),
+      builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Visualizza un indicatore di caricamento durante l'attesa dei dati
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Spesa'),
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          // Restituisce il widget della TabBar se sono disponibili i dati
+          return snapshot.data!;
+        } else {
+          // Visualizza un messaggio di errore se si verificano problemi nel recupero dei dati
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Spesa'),
+            ),
+            body: const Center(
+              child: Text('Error retrieving data'),
+            ),
+          );
+        }
+      },
     );
   }
 }
