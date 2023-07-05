@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:appspesa/connection.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +25,10 @@ class MyAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+
     Future<Widget> buildTabBar() async {
       final conn = await connectToDatabase();
 
@@ -73,7 +75,6 @@ class MyAppBar extends StatelessWidget {
       }
 
       // Ottiene il colore del tema corrente
-      final ColorScheme colorScheme = Theme.of(context).colorScheme;
       final int tabsCount = tabWidgets.length;
 
       await conn.close();
@@ -84,30 +85,39 @@ class MyAppBar extends StatelessWidget {
         initialIndex: 1,
         length: tabsCount,
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text('Spesa'),
+            appBar: AppBar(
+              title: const Text('Spesa'),
 
-            // Imposta il predicate per mostrare la notifica solo quando lo scroll è a profondità 1
-            notificationPredicate: (ScrollNotification notification) {
-              return notification.depth == 1;
-            },
-            // L'elevazione dell'app bar quando lo scroll view è sotto di essa
-            scrolledUnderElevation: 2.0,
-            // Colore dell'ombra dell'app bar
-            // ignore: use_build_context_synchronously
-            shadowColor: Theme.of(context).shadowColor,
-            // TabBar con le Tab generate dalla query
-            bottom: TabBar(
-              isScrollable: true,
-              tabs: tabWidgets,
+              // Imposta il predicate per mostrare la notifica solo quando lo scroll è a profondità 1
+              notificationPredicate: (ScrollNotification notification) {
+                return notification.depth == 1;
+              },
+              // L'elevazione dell'app bar quando lo scroll view è sotto di essa
+              scrolledUnderElevation: 2.0,
+              // Colore dell'ombra dell'app bar
+              // ignore: use_build_context_synchronously
+              shadowColor: Theme.of(context).shadowColor,
+              // TabBar con le Tab generate dalla query
+              bottom: TabBar(
+                isScrollable: true,
+                tabs: tabWidgets,
+              ),
             ),
-          ),
-          // body: TabBarView(
-          //   children: <Widget>[
-          //     // ListView.builder(itemBuilder: itemBuilder),
-          //   ],
-          // )
-        ),
+            body: TabBarView(
+              children: prodotti.keys.map((key) {
+                return ListView.builder(
+                  itemCount: prodotti[key]?.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    String? nomeProdotto = prodotti[key]?[index].nome;
+                    String? marcaProdotto = prodotti[key]?[index].nomeMarca;
+                    return ListTile(
+                      tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                      title: Text("${nomeProdotto!} ${marcaProdotto!}"),
+                    );
+                  },
+                );
+              }).toList(),
+            )),
       );
     }
 

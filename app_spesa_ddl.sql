@@ -25,7 +25,6 @@ CREATE TABLE prodotto (
     isDaRicomprare boolean not null,
     isPiaciuto boolean,
     nota varchar(200),
-    immagine blob,
     CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome),
     CONSTRAINT prodotto_marca FOREIGN KEY (nome_marca) REFERENCES marca(nome) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT prodotto_tipo FOREIGN KEY (nome_tipo) REFERENCES tipo(nome) ON DELETE NO ACTION ON UPDATE CASCADE
@@ -36,4 +35,13 @@ INSERT INTO tipo VALUES ("Biscotti"), ("Merendine"), ("Pasta"), ("Crackers"), ("
 
 DELETE FROM marca;
 INSERT INTO marca VALUES("Scharr"), ("Barilla"), ("De Cecco");
+
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Grissini", "Scharr", "Grissini", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Grissini", "Barilla", "Grissini", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Cereali", "Scharr", "Cereali", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Cereali al cioccolato", "Scharr", "Cereali", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Scharr", "Pasta", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Barilla", "Pasta", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Penne", "Barilla", "Pasta", false);
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);
 
