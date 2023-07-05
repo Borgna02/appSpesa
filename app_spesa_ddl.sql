@@ -23,7 +23,7 @@ CREATE TABLE prodotto (
 	nome_marca varchar(50) not null, 
     nome_tipo varchar(50) not null, 
     isDaRicomprare boolean not null,
-    isPiaciuto boolean,
+    isPiaciuto boolean default null,
     nota varchar(200),
     CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome),
     CONSTRAINT prodotto_marca FOREIGN KEY (nome_marca) REFERENCES marca(nome) ON DELETE CASCADE ON UPDATE CASCADE,

@@ -1,6 +1,8 @@
 import 'package:appspesa/connection.dart';
 import 'package:flutter/material.dart';
 
+import 'DettaglioProdottoPage.dart';
+import 'aggiungi_prodotto_page.dart';
 import 'prodotto.dart';
 
 /// Flutter code sample for [AppBar].
@@ -50,7 +52,7 @@ class MyAppBar extends StatelessWidget {
             String nomeMarca = prodotto.colAt(2) as String;
             String nomeTipo = value;
             bool isDaRicomprare = (prodotto.colAt(4) == 'true');
-            bool isPiaciuto = (prodotto.colAt(5) == 'true');
+            bool? isPiaciuto = prodotto.colAt(5) as bool?;
             String? nota = prodotto.colAt(6);
 
             prodottiList.add(Prodotto(
@@ -85,39 +87,87 @@ class MyAppBar extends StatelessWidget {
         initialIndex: 1,
         length: tabsCount,
         child: Scaffold(
-            appBar: AppBar(
-              title: const Text('Spesa'),
+          appBar: AppBar(
+            title: const Text('Spesa'),
 
-              // Imposta il predicate per mostrare la notifica solo quando lo scroll è a profondità 1
-              notificationPredicate: (ScrollNotification notification) {
-                return notification.depth == 1;
-              },
-              // L'elevazione dell'app bar quando lo scroll view è sotto di essa
-              scrolledUnderElevation: 2.0,
-              // Colore dell'ombra dell'app bar
-              // ignore: use_build_context_synchronously
-              shadowColor: Theme.of(context).shadowColor,
-              // TabBar con le Tab generate dalla query
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: tabWidgets,
-              ),
+            // Imposta il predicate per mostrare la notifica solo quando lo scroll è a profondità 1
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 1;
+            },
+            // L'elevazione dell'app bar quando lo scroll view è sotto di essa
+            scrolledUnderElevation: 2.0,
+            // Colore dell'ombra dell'app bar
+            // ignore: use_build_context_synchronously
+            shadowColor: Theme.of(context).shadowColor,
+            // TabBar con le Tab generate dalla query
+            bottom: TabBar(
+              isScrollable: true,
+              tabs: tabWidgets,
             ),
-            body: TabBarView(
-              children: prodotti.keys.map((key) {
-                return ListView.builder(
-                  itemCount: prodotti[key]?.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    String? nomeProdotto = prodotti[key]?[index].nome;
-                    String? marcaProdotto = prodotti[key]?[index].nomeMarca;
-                    return ListTile(
-                      tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                      title: Text("${nomeProdotto!} ${marcaProdotto!}"),
-                    );
-                  },
-                );
-              }).toList(),
-            )),
+          ),
+          body: TabBarView(
+            children: prodotti.keys.map((key) {
+              return ListView.builder(
+                itemCount: prodotti[key]?.length,
+                itemBuilder: (BuildContext context, int index) {
+                  String? nomeProdotto = prodotti[key]?[index].nome;
+                  Prodotto prodotto = prodotti[key]![index];
+                  IconData iconData;
+                  if (prodotto.isPiaciuto == true) {
+                    iconData = Icons.thumb_up;
+                  } else if (prodotto.isPiaciuto == false) {
+                    iconData = Icons.thumb_down;
+                  } else {
+                    iconData = Icons.watch_later;
+                  }
+
+                  return ListTile(
+                    tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                    title: Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          margin: EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: prodotto.isDaRicomprare
+                                ? Colors.red
+                                : Colors.green,
+                          ),
+                        ),
+                        Text(nomeProdotto!),
+                      ],
+                    ),
+                    subtitle: Text(prodotto.nomeMarca),
+                    trailing: Icon(iconData),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DettaglioProdottoPage(prodotto: prodotto),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            }).toList(),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AggiungiProdottoPage(),
+                ),
+              );
+            },
+            child: Icon(Icons.add),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        ),
       );
     }
 
