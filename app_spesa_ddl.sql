@@ -2,9 +2,9 @@ DROP DATABASE IF EXISTS railway;
 CREATE DATABASE railway;
 USE railway;
 
-DROP USER IF EXISTS 'spesaUser'@'localhost';
-CREATE USER 'spesaUser'@'localhost' IDENTIFIED BY 'spesaPwd';
-GRANT select,insert,update,delete,execute ON spesa.* TO 'spesaUser'@'localhost';
+DROP USER IF EXISTS 'spesaUser'@'151.43.54.92';
+CREATE USER 'spesaUser'@'151.43.54.92' IDENTIFIED BY 'spesaPwd';
+GRANT select,insert,update,delete,execute ON railway.* TO 'spesaUser'@'151.43.54.92';
 
 DROP TABLE IF EXISTS marca;
 CREATE TABLE marca (
@@ -43,4 +43,4 @@ INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Cereali
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Scharr", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Barilla", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Penne", "Barilla", "Pasta", false);
-INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);DROP DATABASE spesa
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);

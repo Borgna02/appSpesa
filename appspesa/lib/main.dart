@@ -1,11 +1,10 @@
 import 'package:appspesa/connection_railway.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'dettaglio_prodotto_page.dart';
 import 'aggiungi_prodotto_page.dart';
 import 'prodotto.dart';
-
-/// Flutter code sample for [AppBar].
 
 void main() => runApp(const AppBarApp());
 
@@ -80,7 +79,10 @@ class MyAppBar extends StatelessWidget {
       final int tabsCount = tabWidgets.length;
 
       await conn.close();
-      print('Disconnected from database');
+      Fluttertoast.showToast(
+        msg: "Disconnected from database",
+        gravity: ToastGravity.CENTER,
+      );
 
       // Costruisce la TabBar utilizzando i dati ottenuti dalla query
       return DefaultTabController(
@@ -128,7 +130,7 @@ class MyAppBar extends StatelessWidget {
                         Container(
                           width: 12,
                           height: 12,
-                          margin: EdgeInsets.only(right: 8),
+                          margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: prodotto.isDaRicomprare
@@ -164,7 +166,7 @@ class MyAppBar extends StatelessWidget {
                 ),
               );
             },
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ),
@@ -188,14 +190,24 @@ class MyAppBar extends StatelessWidget {
         } else if (snapshot.hasData) {
           // Restituisce il widget della TabBar se sono disponibili i dati
           return snapshot.data!;
+        } else if (snapshot.hasError) {
+          // Visualizza il messaggio di errore ricevuto dal database
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text('Spesa'),
+            ),
+            body: Center(
+              child: Text('Error retrieving data: ${snapshot.error}'),
+            ),
+          );
         } else {
-          // Visualizza un messaggio di errore se si verificano problemi nel recupero dei dati
+          // Visualizza un messaggio generico di errore se si verifica un problema sconosciuto
           return Scaffold(
             appBar: AppBar(
               title: const Text('Spesa'),
             ),
             body: const Center(
-              child: Text('Error retrieving data'),
+              child: Text('Unknown error occurred'),
             ),
           );
         }
