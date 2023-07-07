@@ -1,7 +1,7 @@
-import 'package:appspesa/connection.dart';
+import 'package:appspesa/connection_railway.dart';
 import 'package:flutter/material.dart';
 
-import 'DettaglioProdottoPage.dart';
+import 'dettaglio_prodotto_page.dart';
 import 'aggiungi_prodotto_page.dart';
 import 'prodotto.dart';
 

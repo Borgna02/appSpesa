@@ -1,6 +1,6 @@
-drop database if exists spesa;
-create database spesa;
-USE spesa;
+DROP DATABASE IF EXISTS railway;
+CREATE DATABASE railway;
+USE railway;
 
 DROP USER IF EXISTS 'spesaUser'@'localhost';
 CREATE USER 'spesaUser'@'localhost' IDENTIFIED BY 'spesaPwd';
@@ -25,7 +25,7 @@ CREATE TABLE prodotto (
     isDaRicomprare boolean not null,
     isPiaciuto boolean default null,
     nota varchar(200),
-    CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome),
+    CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome, nome_tipo),
     CONSTRAINT prodotto_marca FOREIGN KEY (nome_marca) REFERENCES marca(nome) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT prodotto_tipo FOREIGN KEY (nome_tipo) REFERENCES tipo(nome) ON DELETE NO ACTION ON UPDATE CASCADE
 );
@@ -43,5 +43,4 @@ INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Cereali
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Scharr", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Barilla", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Penne", "Barilla", "Pasta", false);
-INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);
-
+INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);DROP DATABASE spesa
