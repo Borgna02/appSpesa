@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../pages/mytheme.dart';
+
 class VotazioneButton extends StatefulWidget {
   @override
   _VotazioneButtonState createState() => _VotazioneButtonState();
@@ -24,7 +26,7 @@ class _VotazioneButtonState extends State<VotazioneButton> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final colorScheme = MyTheme.getThemeData().colorScheme;
     final accentColor = colorScheme
         .primary; // Usa il colore primario come colore di evidenziazione
 
