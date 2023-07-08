@@ -21,7 +21,7 @@ class DettaglioProdottoPage extends StatelessWidget {
             Text('Tipo: ${prodotto.nomeTipo}'),
             Text('Da Ricomprare: ${prodotto.isDaRicomprare}'),
             Text('Piaciuto: ${prodotto.isPiaciuto}'),
-            Text('Nota: ${prodotto.nota ?? '-'}'),
+            // Image('Immagine: ${prodotto.immagine}'),
           ],
         ),
       ),

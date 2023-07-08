@@ -1,5 +1,9 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:appspesa/pages/mytheme.dart';
 import 'package:flutter/material.dart';
 import '../connection/connection_railway.dart';
@@ -37,8 +41,17 @@ class Home extends StatelessWidget {
             String nomeMarca = prodotto.colAt(2) as String;
             String nomeTipo = value;
             bool isDaRicomprare = (prodotto.colAt(4) == 'true');
-            bool? isPiaciuto = prodotto.colAt(5) as bool?;
-            String? nota = prodotto.colAt(6);
+            bool? isPiaciuto;
+            if (prodotto.colAt(5) != null) {
+              isPiaciuto = (prodotto.colAt(5) == 'true');
+            }
+            Uint8List? immagine;
+            if (prodotto.colAt(6) == null) {
+              immagine = null;
+            } else {
+              immagine = base64.decode(
+                  prodotto.colAt(6) as String); // Valore BLOB come stringa
+            }
 
             prodottiList.add(Prodotto(
                 id: idProdotto,
@@ -47,7 +60,7 @@ class Home extends StatelessWidget {
                 nomeTipo: nomeTipo,
                 isDaRicomprare: isDaRicomprare,
                 isPiaciuto: isPiaciuto,
-                nota: nota));
+                immagine: immagine));
           }
 
           prodotti[value] = prodottiList;
@@ -106,6 +119,7 @@ class Home extends StatelessWidget {
                     iconData = Icons.watch_later;
                   }
 
+                  //TODO aggiungere aggiornamento lista quando si aggiunge un nuovo prodotto
                   return ListTile(
                     tileColor: index.isOdd ? oddItemColor : evenItemColor,
                     title: Row(

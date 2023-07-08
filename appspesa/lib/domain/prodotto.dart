@@ -1,19 +1,22 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 class Prodotto {
-  int id;
+  int? id;
   String nome;
   String nomeMarca;
   String nomeTipo;
   bool isDaRicomprare;
   bool? isPiaciuto;
-  String? nota;
+  Uint8List? immagine;
 
   Prodotto({
-    required this.id,
+    this.id,
     required this.nome,
     required this.nomeMarca,
     required this.nomeTipo,
     required this.isDaRicomprare,
     this.isPiaciuto,
-    this.nota,
+    this.immagine,
   });
 }

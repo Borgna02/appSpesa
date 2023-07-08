@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 import '../pages/mytheme.dart';
 
 class VotazioneButton extends StatefulWidget {
+  final void Function(bool?)? onVoteSelected;
+
+  const VotazioneButton({Key? key, this.onVoteSelected}) : super(key: key);
+
   @override
   _VotazioneButtonState createState() => _VotazioneButtonState();
 }
 
 class _VotazioneButtonState extends State<VotazioneButton> {
-  List<bool> _selections = [false, false, false];
+  List<bool> _selections = [false, true, false];
   bool? isPiaciuto;
 
   void _setSelection(int index) {
@@ -20,6 +24,11 @@ class _VotazioneButtonState extends State<VotazioneButton> {
         isPiaciuto = null;
       } else {
         isPiaciuto = false;
+      }
+
+      // Richiama la callback con il valore selezionato
+      if (widget.onVoteSelected != null) {
+        widget.onVoteSelected!(isPiaciuto);
       }
     });
   }
