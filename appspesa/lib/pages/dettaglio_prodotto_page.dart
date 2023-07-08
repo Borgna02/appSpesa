@@ -4,7 +4,7 @@ import '../domain/prodotto.dart';
 class DettaglioProdottoPage extends StatelessWidget {
   final Prodotto prodotto;
 
-  const DettaglioProdottoPage({required this.prodotto});
+  const DettaglioProdottoPage({super.key, required this.prodotto});
 
   @override
   Widget build(BuildContext context) {

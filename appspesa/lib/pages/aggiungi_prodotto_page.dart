@@ -5,16 +5,19 @@ import 'dart:typed_data';
 import 'package:appspesa/domain/prodotto.dart';
 import 'package:appspesa/widgets/votazione_button.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:image/image.dart' as img;
+import 'package:mysql_client/exception.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../connection/connection_railway.dart';
 import '../data/data_dispatcher.dart';
 import 'mytheme.dart';
 
 class AggiungiProdottoPage extends StatefulWidget {
-  const AggiungiProdottoPage({Key? key});
+  const AggiungiProdottoPage({super.key});
 
   @override
   _AggiungiProdottoPageState createState() => _AggiungiProdottoPageState();
@@ -46,24 +49,34 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
 
     if (pickedImage != null) {
       imageFile = File(pickedImage.path);
-      final compressedImage = await compressImage(imageFile, 300, 300, 10);
+
+      final compressedImage = await compressImage(
+        imageFile,
+        200, // Larghezza massima
+        200, // Altezza massima
+        10, // Qualità della compressione
+      );
 
       setState(() {
-        _selectedImage = compressedImage as Uint8List?;
+        _selectedImage = compressedImage;
       });
     }
   }
 
-  Future<List<int>> compressImage(
-      File imageFile, int maxWidth, int maxHeight, int quality) async {
-    final bytes = await imageFile.readAsBytes();
-    final image = img.decodeImage(bytes);
+  Future<Uint8List> compressImage(
+    File imageFile,
+    int maxWidth,
+    int maxHeight,
+    int quality,
+  ) async {
+    final result = await FlutterImageCompress.compressWithFile(
+      imageFile.path,
+      minWidth: maxWidth,
+      minHeight: maxHeight,
+      quality: quality,
+    );
 
-    final resizedImage =
-        img.copyResize(image!, width: maxWidth, height: maxHeight);
-    final compressedBytes = img.encodeJpg(resizedImage, quality: quality);
-
-    return compressedBytes;
+    return result!;
   }
 
   @override
@@ -196,6 +209,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                           onVoteSelected: (vote) {
                             setState(() {
                               _selectedVote = vote;
+                              print(vote);
                             });
                           },
                         ),
@@ -246,9 +260,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                         final nomeTipo = _tipoController.text;
                         bool isDaRicomprare = false;
 
-                        // Fai qualcosa con il valore del campo "Nome"
-                        print(_selectedVote);
-
                         var newProdotto = Prodotto(
                             id: null,
                             nome: nomeValue,
@@ -257,8 +268,127 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                             isDaRicomprare: isDaRicomprare,
                             isPiaciuto: _selectedVote,
                             immagine: _selectedImage);
-                        //TODO aggiungere controllo su tipo e marca non esistenti e gestione errore per inserimento duplicati
-                        insertProdotto(newProdotto);
+
+                        if (!containsIgnoreCase(marche, nomeMarca) ||
+                            !containsIgnoreCase(prodotti.keys, nomeTipo)) {
+                          // se bisogna aggiungere uno tra tipo e marca
+                          if (!containsIgnoreCase(marche, nomeMarca)) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Conferma'),
+                                  content: Text(
+                                      'Vuoi inserire la nuova marca "$nomeMarca" nel sistema?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context,
+                                            false); // Chiude il dialogo senza confermare
+                                      },
+                                      child: const Text('Annulla'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pop(context,
+                                            true); // Chiude il dialogo e conferma
+                                      },
+                                      child: const Text('Conferma'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ).then((value) {
+                              if (value == true) {
+                                insertMarca(nomeMarca);
+                                if (!containsIgnoreCase(
+                                    prodotti.keys, nomeTipo)) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text('Conferma'),
+                                        content: Text(
+                                            'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context,
+                                                  false); // Chiude il dialogo senza confermare
+                                            },
+                                            child: const Text('Annulla'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context,
+                                                  true); // Chiude il dialogo e conferma
+                                            },
+                                            child: const Text('Conferma'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ).then((value) {
+                                    if (value == true) {
+                                      insertTipo(nomeTipo);
+                                      _insertProdotto(newProdotto);
+                                      Fluttertoast.showToast(
+                                        msg: 'Prodotto inserito correttamente',
+                                        toastLength: Toast.LENGTH_SHORT,
+                                        gravity: ToastGravity.CENTER,
+                                        timeInSecForIosWeb: 2,
+                                      );
+                                    }
+                                  });
+                                } else {
+                                  _insertProdotto(newProdotto);
+                                  Fluttertoast.showToast(
+                                    msg: 'Prodotto inserito correttamente',
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.CENTER,
+                                    timeInSecForIosWeb: 2,
+                                  );
+                                }
+                              }
+                            });
+                          } else {
+                            if (!containsIgnoreCase(prodotti.keys, nomeTipo)) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Conferma'),
+                                    content: Text(
+                                        'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context,
+                                              false); // Chiude il dialogo senza confermare
+                                        },
+                                        child: const Text('Annulla'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context,
+                                              true); // Chiude il dialogo e conferma
+                                        },
+                                        child: const Text('Conferma'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ).then((value) {
+                                if (value == true) {
+                                  insertTipo(nomeTipo);
+                                  _insertProdotto(newProdotto);
+                                }
+                              });
+                            }
+                          }
+                        } else {
+                          _insertProdotto(newProdotto);
+                        }
                       }
                     }
                   },
@@ -313,4 +443,39 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
       });
     }
   }
+}
+
+void _insertProdotto(Prodotto prodotto) {
+  try {
+    insertProdotto(prodotto).then((_) {
+      Fluttertoast.showToast(
+        msg: 'Prodotto inserito correttamente',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 2,
+      );
+    }).catchError((e) {
+      if (e is MySQLServerException && e.errorCode == 1062) {
+        // Gestione specifica per l'eccezione Duplicate entry
+        Fluttertoast.showToast(
+          msg: 'Prodotto già presente nel sistema',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 2,
+        );
+      } else {
+        // Gestione generica per altre eccezioni
+        print('Errore: ${e.toString()}');
+      }
+    });
+  } catch (e) {
+    print('Errore: ${e.toString()}');
+  }
+}
+
+bool containsIgnoreCase(Iterable<String> set, String element) {
+  for (String e in set) {
+    if (e.toLowerCase() == element.toLowerCase()) return true;
+  }
+  return false;
 }

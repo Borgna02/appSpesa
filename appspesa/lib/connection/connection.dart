@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:mysql_client/mysql_client.dart';
 
 import '../domain/prodotto.dart';
@@ -24,7 +26,7 @@ Future<MySQLConnection> connectToDatabase() async {
 Future<void> insertProdotto(Prodotto prodotto) async {
   final conn = await connectToDatabase();
 
-  var results = await conn.execute(
+  await conn.execute(
       'INSERT INTO prodotto (nome, nome_marca, nome_tipo, isDaRicomprare, isPiaciuto, Immagine) VALUES ("${prodotto.nome}", ${prodotto.nomeMarca}, ${prodotto.nomeTipo}, ${prodotto.isDaRicomprare}, ${prodotto.isPiaciuto}, ${prodotto.immagine}});');
 
   await conn.close();

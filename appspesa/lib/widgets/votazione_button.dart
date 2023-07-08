@@ -1,3 +1,5 @@
+// ignore_for_file: sort_child_properties_last
+
 import 'package:flutter/material.dart';
 
 import '../pages/mytheme.dart';
@@ -8,6 +10,7 @@ class VotazioneButton extends StatefulWidget {
   const VotazioneButton({Key? key, this.onVoteSelected}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _VotazioneButtonState createState() => _VotazioneButtonState();
 }
 
@@ -40,7 +43,7 @@ class _VotazioneButtonState extends State<VotazioneButton> {
         .primary; // Usa il colore primario come colore di evidenziazione
 
     return ToggleButtons(
-      children: [
+      children: const [
         Icon(Icons.thumb_up),
         Icon(Icons.watch_later),
         Icon(Icons.thumb_down),

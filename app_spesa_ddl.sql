@@ -45,3 +45,18 @@ INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Fusilli", "Barilla", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Penne", "Barilla", "Pasta", false);
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);
+
+DELIMITER $$
+DROP TRIGGER IF EXISTS checkMarcaProdotto;
+
+CREATE TRIGGER checkMarcaProdotto BEFORE INSERT ON prodotto
+FOR EACH ROW
+BEGIN
+    DECLARE marca VARCHAR(255);
+    SELECT nome INTO marca FROM marca WHERE lower(nome) = lower(NEW.nomeMarca);
+    SET NEW.nomeMarca = marca;
+END$$
+
+DELIMITER ;
+
+	

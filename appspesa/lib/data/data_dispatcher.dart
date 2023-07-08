@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -30,10 +32,11 @@ Future<void> loadData() async {
         String nomeProdotto = prodotto.colAt(1) as String;
         String nomeMarca = prodotto.colAt(2) as String;
         String nomeTipo = value;
-        bool isDaRicomprare = (prodotto.colAt(4) == 'true');
+        bool isDaRicomprare = (prodotto.colAt(4) == '1');
         bool? isPiaciuto;
+
         if (prodotto.colAt(5) != null) {
-          isPiaciuto = (prodotto.colAt(5) == 'true');
+          isPiaciuto = (prodotto.colAt(5) == "1");
         }
         Uint8List? immagine;
         if (prodotto.colAt(6) == null) {

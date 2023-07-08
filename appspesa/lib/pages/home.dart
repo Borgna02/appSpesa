@@ -31,7 +31,7 @@ class Home extends StatelessWidget {
 
     // Costruisce la TabBar utilizzando i dati ottenuti dalla query
     return DefaultTabController(
-      initialIndex: 1,
+      initialIndex: 0,
       length: tabsCount,
       child: Scaffold(
         appBar: AppBar(
@@ -101,7 +101,7 @@ class Home extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AggiungiProdottoPage(),
+                builder: (context) => const AggiungiProdottoPage(),
               ),
             );
           },
