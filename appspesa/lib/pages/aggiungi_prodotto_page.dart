@@ -8,13 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:image/image.dart' as img;
 import 'package:mysql_client/exception.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../connection/connection_railway.dart';
 import '../data/data_dispatcher.dart';
 import 'mytheme.dart';
+import 'home.dart';
 
 class AggiungiProdottoPage extends StatefulWidget {
   const AggiungiProdottoPage({super.key});
@@ -23,13 +23,14 @@ class AggiungiProdottoPage extends StatefulWidget {
   _AggiungiProdottoPageState createState() => _AggiungiProdottoPageState();
 }
 
+Prodotto? newProdotto;
+String? newTipo;
+
 class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   final _formKey = GlobalKey<FormState>();
   final _marcaController = TextEditingController();
   final _tipoController = TextEditingController();
   final _nomeController = TextEditingController();
-  bool isTipoSuggestionSelected = false;
-  bool isMarcaSuggestionSelected = false;
   bool? _selectedVote;
   List<String> _tipoSuggestions = [];
   List<String> _marcaSuggestions = [];
@@ -87,6 +88,16 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Aggiungi Prodotto'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Azione da eseguire quando viene premuto il tasto di ritorno
+            Navigator.of(context).pop({
+              'tipoAdded': newTipo,
+              'prodottoAdded': newProdotto,
+            });
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -137,7 +148,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                       title: Text(suggestion),
                       tileColor: index.isOdd ? oddItemColor : evenItemColor,
                       onTap: () {
-                        isMarcaSuggestionSelected = true;
                         _marcaController.text = suggestion;
                         if (_marcaController.text.isNotEmpty) {
                           _marcaController.selection =
@@ -157,7 +167,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                 TextFormField(
                   controller: _tipoController,
                   onChanged: (value) {
-                    isTipoSuggestionSelected = false;
                     setState(() {
                       _fetchTypeSuggestions(value);
                     });
@@ -185,7 +194,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                       title: Text(suggestion),
                       tileColor: index.isOdd ? oddItemColor : evenItemColor,
                       onTap: () {
-                        isTipoSuggestionSelected = true;
                         _tipoController.text = suggestion;
                         if (_tipoController.text.isNotEmpty) {
                           _tipoController.selection =
@@ -260,7 +268,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                         final nomeTipo = _tipoController.text;
                         bool isDaRicomprare = false;
 
-                        var newProdotto = Prodotto(
+                        newProdotto = Prodotto(
                             id: null,
                             nome: nomeValue,
                             nomeMarca: nomeMarca,
@@ -330,24 +338,12 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                                     },
                                   ).then((value) {
                                     if (value == true) {
-                                      insertTipo(nomeTipo);
-                                      _insertProdotto(newProdotto);
-                                      Fluttertoast.showToast(
-                                        msg: 'Prodotto inserito correttamente',
-                                        toastLength: Toast.LENGTH_SHORT,
-                                        gravity: ToastGravity.CENTER,
-                                        timeInSecForIosWeb: 2,
-                                      );
+                                      _insertTipo(nomeTipo);
+                                      _insertProdotto(context, newProdotto!);
                                     }
                                   });
                                 } else {
-                                  _insertProdotto(newProdotto);
-                                  Fluttertoast.showToast(
-                                    msg: 'Prodotto inserito correttamente',
-                                    toastLength: Toast.LENGTH_SHORT,
-                                    gravity: ToastGravity.CENTER,
-                                    timeInSecForIosWeb: 2,
-                                  );
+                                  _insertProdotto(context, newProdotto!);
                                 }
                               }
                             });
@@ -380,14 +376,14 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                                 },
                               ).then((value) {
                                 if (value == true) {
-                                  insertTipo(nomeTipo);
-                                  _insertProdotto(newProdotto);
+                                  _insertTipo(nomeTipo);
+                                  _insertProdotto(context, newProdotto!);
                                 }
                               });
                             }
                           }
                         } else {
-                          _insertProdotto(newProdotto);
+                          _insertProdotto(context, newProdotto!);
                         }
                       }
                     }
@@ -445,7 +441,12 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   }
 }
 
-void _insertProdotto(Prodotto prodotto) {
+void _insertTipo(String tipo) {
+  insertTipo(tipo);
+  newTipo = tipo;
+}
+
+void _insertProdotto(BuildContext context, Prodotto prodotto) {
   try {
     insertProdotto(prodotto).then((_) {
       Fluttertoast.showToast(
@@ -454,6 +455,10 @@ void _insertProdotto(Prodotto prodotto) {
         gravity: ToastGravity.CENTER,
         timeInSecForIosWeb: 2,
       );
+      Navigator.of(context).pop({
+        'tipoAdded': newTipo,
+        'prodottoAdded': newProdotto,
+      });
     }).catchError((e) {
       if (e is MySQLServerException && e.errorCode == 1062) {
         // Gestione specifica per l'eccezione Duplicate entry

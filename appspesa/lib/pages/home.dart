@@ -5,8 +5,18 @@ import 'aggiungi_prodotto_page.dart';
 import 'dettaglio_prodotto_page.dart';
 import '../domain/prodotto.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,11 +109,22 @@ class Home extends StatelessWidget {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AggiungiProdottoPage(),
-              ),
-            );
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AggiungiProdottoPage()))
+                .then((result) {
+              if (result != null && result['tipoAdded'] != null) {
+                tabWidgets.add(Tab(
+                  text: result['tipoAdded'],
+                ));
+              }
+              if (result != null && result['prodottoAdded'] != null) {
+                Prodotto prodottoAggiunto = result['prodottoAdded'];
+                String tipo = prodottoAggiunto.nomeTipo;
+
+                setState(() {});
+              }
+            });
           },
           child: const Icon(Icons.add),
         ),
