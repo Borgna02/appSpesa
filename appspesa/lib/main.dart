@@ -12,7 +12,7 @@ class AppBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
-      future: loadProdotti(),
+      future: loadData(),
       builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return MaterialApp(

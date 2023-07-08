@@ -1,4 +1,4 @@
-// ignore_for_file: unused_field, library_private_types_in_public_api
+// ignore_for_file: unused_field, library_private_types_in_public_api, avoid_print
 
 import 'dart:typed_data';
 
@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 
 import '../connection/connection_railway.dart';
+import '../data/data_dispatcher.dart';
 import 'mytheme.dart';
 
 class AggiungiProdottoPage extends StatefulWidget {
@@ -272,16 +273,18 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   }
 
   Future<void> _fetchTypeSuggestions(String input) async {
+    Set<String> suggestions = {};
+
     if (input.isNotEmpty) {
-      final suggestions = await fetchTypeSuggestions(input);
-      setState(() {
-        _tipoSuggestions = suggestions;
-      });
-    } else {
-      setState(() {
-        _tipoSuggestions = [];
-      });
+      for (String tipo in prodotti.keys) {
+        if (tipo.toLowerCase().contains(input.toLowerCase())) {
+          suggestions.add(tipo);
+        }
+      }
     }
+    setState(() {
+      _tipoSuggestions = suggestions.toList();
+    });
   }
 
   void _clearTipoSuggestions() {
@@ -296,15 +299,17 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
     });
   }
 
-  Future<void> _fetchMarcheSuggestions(String input) async {
+  void _fetchMarcheSuggestions(String input) {
+    Set<String> suggestions = {};
+
     if (input.isNotEmpty) {
-      final suggestions = await fetchMarcheSuggestions(input);
+      for (String marca in marche) {
+        if (marca.toLowerCase().contains(input.toLowerCase())) {
+          suggestions.add(marca);
+        }
+      }
       setState(() {
-        _marcaSuggestions = suggestions;
-      });
-    } else {
-      setState(() {
-        _marcaSuggestions = [];
+        _marcaSuggestions = suggestions.toList();
       });
     }
   }

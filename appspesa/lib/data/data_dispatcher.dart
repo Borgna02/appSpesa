@@ -5,12 +5,18 @@ import '../connection/connection_railway.dart';
 import '../domain/prodotto.dart';
 
 Map<String, List<Prodotto>> prodotti = {};
+List<String> marche = [];
 
-Future<void> loadProdotti() async {
+Future<void> loadData() async {
   final conn = await connectToDatabase();
 
+  var results = await conn.execute('SELECT * FROM marca');
+  for (var row in results.rows) {
+    marche.add(row.colAt(0)!);
+  }
+
   // Esegue la query per ottenere i dati dal database
-  var results = await conn.execute('SELECT * FROM tipo');
+  results = await conn.execute('SELECT * FROM tipo');
   // Map<String, List<Prodotto>> prodotti = {};
   for (var row in results.rows) {
     String? value = row.colAt(0);
