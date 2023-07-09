@@ -15,6 +15,7 @@ class VotazioneButton extends StatefulWidget {
 }
 
 class _VotazioneButtonState extends State<VotazioneButton> {
+  // in questo modo di default la selezione è impostata sull'orologio
   List<bool> _selections = [false, true, false];
   bool? isPiaciuto;
 
@@ -36,6 +37,7 @@ class _VotazioneButtonState extends State<VotazioneButton> {
     });
   }
 
+  // costruzione del button
   @override
   Widget build(BuildContext context) {
     final colorScheme = MyTheme.getThemeData().colorScheme;

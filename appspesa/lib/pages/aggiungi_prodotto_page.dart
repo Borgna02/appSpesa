@@ -6,15 +6,15 @@ import 'package:appspesa/domain/prodotto.dart';
 import 'package:appspesa/widgets/votazione_button.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:mysql_client/exception.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../connection/connection_railway.dart';
 import '../data/data_dispatcher.dart';
+import '../utilities/image_helper.dart';
 import 'mytheme.dart';
-import 'home.dart';
 
 class AggiungiProdottoPage extends StatefulWidget {
   const AggiungiProdottoPage({super.key});
@@ -25,6 +25,7 @@ class AggiungiProdottoPage extends StatefulWidget {
 
 Prodotto? newProdotto;
 String? newTipo;
+final ImageHelper imageHelper = ImageHelper();
 
 class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   final _formKey = GlobalKey<FormState>();
@@ -45,22 +46,25 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   }
 
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final pickedImage = await imageHelper.pickImage();
 
     if (pickedImage != null) {
-      imageFile = File(pickedImage.path);
+      final croppedFile = await imageHelper.crop(
+          file: pickedImage, cropStyle: CropStyle.rectangle);
+      if (croppedFile != null) {
+        imageFile = File(croppedFile.path);
 
-      final compressedImage = await compressImage(
-        imageFile,
-        200, // Larghezza massima
-        200, // Altezza massima
-        10, // Qualità della compressione
-      );
+        final compressedImage = await compressImage(
+          imageFile,
+          200, // Larghezza massima
+          200, // Altezza massima
+          10, // Qualità della compressione
+        );
 
-      setState(() {
-        _selectedImage = compressedImage;
-      });
+        setState(() {
+          _selectedImage = compressedImage;
+        });
+      }
     }
   }
 
@@ -89,7 +93,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
       appBar: AppBar(
         title: const Text('Aggiungi Prodotto'),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // Azione da eseguire quando viene premuto il tasto di ritorno
             Navigator.of(context).pop({
@@ -217,7 +221,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                           onVoteSelected: (vote) {
                             setState(() {
                               _selectedVote = vote;
-                              print(vote);
                             });
                           },
                         ),

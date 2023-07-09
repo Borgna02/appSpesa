@@ -111,7 +111,7 @@ class _HomeState extends State<Home> {
             Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => AggiungiProdottoPage()))
+                        builder: (context) => const AggiungiProdottoPage()))
                 .then((result) {
               if (result != null && result['tipoAdded'] != null) {
                 tabWidgets.add(Tab(
@@ -119,9 +119,6 @@ class _HomeState extends State<Home> {
                 ));
               }
               if (result != null && result['prodottoAdded'] != null) {
-                Prodotto prodottoAggiunto = result['prodottoAdded'];
-                String tipo = prodottoAggiunto.nomeTipo;
-
                 setState(() {});
               }
             });
