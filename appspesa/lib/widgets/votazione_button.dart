@@ -35,6 +35,7 @@ class _VotazioneButtonState extends State<VotazioneButton> {
         widget.onVoteSelected!(isPiaciuto);
       }
     });
+    FocusScope.of(context).unfocus(); // Chiude la tastiera
   }
 
   // costruzione del button

@@ -24,7 +24,7 @@ CREATE TABLE prodotto (
     nome_tipo varchar(50) not null, 
     isDaRicomprare boolean not null,
     isPiaciuto boolean default null,
-    immagine blob, 
+    immagine longblob, 
     nota varchar(200),
     CONSTRAINT prodotti_distinti UNIQUE (nome_marca, nome, nome_tipo),
     CONSTRAINT prodotto_marca FOREIGN KEY (nome_marca) REFERENCES marca(nome) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -47,14 +47,18 @@ INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Penne",
 INSERT INTO prodotto(nome, nome_marca, nome_tipo, isDaRicomprare) VALUE("Rigatoni", "Barilla", "Pasta", false);
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS checkMarcaProdotto;
+DROP TRIGGER IF EXISTS checkMarcaProdotto$$
 
 CREATE TRIGGER checkMarcaProdotto BEFORE INSERT ON prodotto
 FOR EACH ROW
 BEGIN
-    DECLARE marca VARCHAR(255);
-    SELECT nome INTO marca FROM marca WHERE lower(nome) = lower(NEW.nomeMarca);
-    SET NEW.nomeMarca = marca;
+    DECLARE v_marca VARCHAR(50);
+    DECLARE v_tipo VARCHAR(50);
+    SELECT nome INTO v_marca FROM marca WHERE lower(nome) = lower(NEW.nome_marca);
+    SELECT nome INTO v_tipo FROM tipo WHERE lower(nome) = lower(NEW.nome_tipo);
+    SET NEW.nome_marca = v_marca;
+    SET NEW.nome_tipo = v_tipo;
+    
 END$$
 
 DELIMITER ;
