@@ -228,11 +228,6 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                         width: 200,
                         height: 200,
                       ),
-                    /* Image.file(
-                    imageFile,
-                    width: 200,
-                    height: 200,
-                  ), */
                     const SizedBox(height: 16.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -279,116 +274,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                                 isPiaciuto: _selectedVote,
                                 immagine: _selectedImage);
 
-                            if (!containsIgnoreCase(marche, nomeMarca) ||
-                                !containsIgnoreCase(prodotti.keys, nomeTipo)) {
-                              // se bisogna aggiungere uno tra tipo e marca
-                              if (!containsIgnoreCase(marche, nomeMarca)) {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return AlertDialog(
-                                      title: const Text('Conferma'),
-                                      content: Text(
-                                          'Vuoi inserire la nuova marca "$nomeMarca" nel sistema?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context,
-                                                false); // Chiude il dialogo senza confermare
-                                          },
-                                          child: const Text('Annulla'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pop(context,
-                                                true); // Chiude il dialogo e conferma
-                                          },
-                                          child: const Text('Conferma'),
-                                        ),
-                                      ],
-                                    );
-                                  },
-                                ).then((value) {
-                                  if (value == true) {
-                                    insertMarca(nomeMarca);
-                                    if (!containsIgnoreCase(
-                                        prodotti.keys, nomeTipo)) {
-                                      showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: const Text('Conferma'),
-                                            content: Text(
-                                                'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context,
-                                                      false); // Chiude il dialogo senza confermare
-                                                },
-                                                child: const Text('Annulla'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context,
-                                                      true); // Chiude il dialogo e conferma
-                                                },
-                                                child: const Text('Conferma'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      ).then((value) {
-                                        if (value == true) {
-                                          _insertTipo(nomeTipo);
-                                          _insertProdotto(
-                                              context, newProdotto!);
-                                        }
-                                      });
-                                    } else {
-                                      _insertProdotto(context, newProdotto!);
-                                    }
-                                  }
-                                });
-                              } else {
-                                if (!containsIgnoreCase(
-                                    prodotti.keys, nomeTipo)) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Conferma'),
-                                        content: Text(
-                                            'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context,
-                                                  false); // Chiude il dialogo senza confermare
-                                            },
-                                            child: const Text('Annulla'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context,
-                                                  true); // Chiude il dialogo e conferma
-                                            },
-                                            child: const Text('Conferma'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ).then((value) {
-                                    if (value == true) {
-                                      _insertTipo(nomeTipo);
-                                      _insertProdotto(context, newProdotto!);
-                                    }
-                                  });
-                                }
-                              }
-                            } else {
-                              _insertProdotto(context, newProdotto!);
-                            }
+                            marcaTipoCheck(context, nomeMarca, nomeTipo);
                           }
                         }
                       },
@@ -451,19 +337,43 @@ void _insertTipo(String tipo) {
 }
 
 void _insertProdotto(BuildContext context, Prodotto prodotto) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Inserimento in corso...'),
+          ],
+        ),
+      );
+    },
+  );
+
   try {
     insertProdotto(prodotto).then((_) {
+      Navigator.of(context)
+          .pop(); // Chiude la AlertDialog del progress indicator
+
       Fluttertoast.showToast(
         msg: 'Prodotto inserito correttamente',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.CENTER,
         timeInSecForIosWeb: 2,
       );
+
       Navigator.of(context).pop({
         'tipoAdded': newTipo,
         'prodottoAdded': newProdotto,
       });
     }).catchError((e) {
+      Navigator.of(context)
+          .pop(); // Chiude la AlertDialog del progress indicator
+
       if (e is MySQLServerException && e.errorCode == 1062) {
         // Gestione specifica per l'eccezione Duplicate entry
         Fluttertoast.showToast(
@@ -478,6 +388,7 @@ void _insertProdotto(BuildContext context, Prodotto prodotto) {
       }
     });
   } catch (e) {
+    Navigator.of(context).pop(); // Chiude la AlertDialog del progress indicator
     print('Errore: ${e.toString()}');
   }
 }
@@ -487,4 +398,113 @@ bool containsIgnoreCase(Iterable<String> set, String element) {
     if (e.toLowerCase() == element.toLowerCase()) return true;
   }
   return false;
+}
+
+void marcaTipoCheck(BuildContext context, String nomeMarca, String nomeTipo) {
+  if (!containsIgnoreCase(marche, nomeMarca) ||
+      !containsIgnoreCase(prodotti.keys, nomeTipo)) {
+    // se bisogna aggiungere uno tra tipo e marca
+    if (!containsIgnoreCase(marche, nomeMarca)) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Conferma'),
+            content:
+                Text('Vuoi inserire la nuova marca "$nomeMarca" nel sistema?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(
+                      context, false); // Chiude il dialogo senza confermare
+                },
+                child: const Text('Annulla'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, true); // Chiude il dialogo e conferma
+                },
+                child: const Text('Conferma'),
+              ),
+            ],
+          );
+        },
+      ).then((value) {
+        if (value == true) {
+          insertMarca(nomeMarca);
+          if (!containsIgnoreCase(prodotti.keys, nomeTipo)) {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Conferma'),
+                  content: Text(
+                      'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context,
+                            false); // Chiude il dialogo senza confermare
+                      },
+                      child: const Text('Annulla'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(
+                            context, true); // Chiude il dialogo e conferma
+                      },
+                      child: const Text('Conferma'),
+                    ),
+                  ],
+                );
+              },
+            ).then((value) {
+              if (value == true) {
+                _insertTipo(nomeTipo);
+                _insertProdotto(context, newProdotto!);
+              }
+            });
+          } else {
+            _insertProdotto(context, newProdotto!);
+          }
+        }
+      });
+    } else {
+      if (!containsIgnoreCase(prodotti.keys, nomeTipo)) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Conferma'),
+              content:
+                  Text('Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(
+                        context, false); // Chiude il dialogo senza confermare
+                  },
+                  child: const Text('Annulla'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(
+                        context, true); // Chiude il dialogo e conferma
+                  },
+                  child: const Text('Conferma'),
+                ),
+              ],
+            );
+          },
+        ).then((value) {
+          if (value == true) {
+            _insertTipo(nomeTipo);
+            _insertProdotto(context, newProdotto!);
+          }
+        });
+      }
+    }
+  } else {
+    _insertProdotto(context, newProdotto!);
+  }
 }
