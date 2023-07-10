@@ -5,12 +5,9 @@ import 'dart:typed_data';
 import 'package:appspesa/domain/prodotto.dart';
 import 'package:appspesa/widgets/votazione_button.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
-import 'package:mysql_client/exception.dart';
 
-import '../connection/connection_railway.dart';
 import '../data/data_dispatcher.dart';
 import '../utilities/image_helper.dart';
 import 'mytheme.dart';
@@ -265,7 +262,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                             final nomeTipo = _tipoController.text;
                             bool isDaRicomprare = false;
 
-                            newProdotto = Prodotto(
+                            final newProdotto = Prodotto(
                                 id: null,
                                 nome: nomeValue,
                                 nomeMarca: nomeMarca,
@@ -274,7 +271,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                                 isPiaciuto: _selectedVote,
                                 immagine: _selectedImage);
 
-                            marcaTipoCheck(context, nomeMarca, nomeTipo);
+                            marcaTipoCheck(context, null, newProdotto);
                           }
                         }
                       },
@@ -328,183 +325,5 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
         _marcaSuggestions = suggestions.toList();
       });
     }
-  }
-}
-
-void _insertTipo(String tipo) {
-  insertTipo(tipo);
-  newTipo = tipo;
-}
-
-void _insertProdotto(BuildContext context, Prodotto prodotto) {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext context) {
-      return const AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Inserimento in corso...'),
-          ],
-        ),
-      );
-    },
-  );
-
-  try {
-    insertProdotto(prodotto).then((_) {
-      Navigator.of(context)
-          .pop(); // Chiude la AlertDialog del progress indicator
-
-      Fluttertoast.showToast(
-        msg: 'Prodotto inserito correttamente',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIosWeb: 2,
-      );
-
-      Navigator.of(context).pop({
-        'tipoAdded': newTipo,
-        'prodottoAdded': newProdotto,
-      });
-    }).catchError((e) {
-      Navigator.of(context)
-          .pop(); // Chiude la AlertDialog del progress indicator
-
-      if (e is MySQLServerException && e.errorCode == 1062) {
-        // Gestione specifica per l'eccezione Duplicate entry
-        Fluttertoast.showToast(
-          msg: 'Prodotto già presente nel sistema',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 2,
-        );
-      } else {
-        // Gestione generica per altre eccezioni
-        print('Errore: ${e.toString()}');
-      }
-    });
-  } catch (e) {
-    Navigator.of(context).pop(); // Chiude la AlertDialog del progress indicator
-    print('Errore: ${e.toString()}');
-  }
-}
-
-bool containsIgnoreCase(Iterable<String> set, String element) {
-  for (String e in set) {
-    if (e.toLowerCase() == element.toLowerCase()) return true;
-  }
-  return false;
-}
-
-void marcaTipoCheck(BuildContext context, String nomeMarca, String nomeTipo) {
-  if (!containsIgnoreCase(marche, nomeMarca) ||
-      !containsIgnoreCase(prodotti.keys, nomeTipo)) {
-    // se bisogna aggiungere uno tra tipo e marca
-    if (!containsIgnoreCase(marche, nomeMarca)) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Conferma'),
-            content:
-                Text('Vuoi inserire la nuova marca "$nomeMarca" nel sistema?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(
-                      context, false); // Chiude il dialogo senza confermare
-                },
-                child: const Text('Annulla'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, true); // Chiude il dialogo e conferma
-                },
-                child: const Text('Conferma'),
-              ),
-            ],
-          );
-        },
-      ).then((value) {
-        if (value == true) {
-          insertMarca(nomeMarca);
-          if (!containsIgnoreCase(prodotti.keys, nomeTipo)) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('Conferma'),
-                  content: Text(
-                      'Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context,
-                            false); // Chiude il dialogo senza confermare
-                      },
-                      child: const Text('Annulla'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(
-                            context, true); // Chiude il dialogo e conferma
-                      },
-                      child: const Text('Conferma'),
-                    ),
-                  ],
-                );
-              },
-            ).then((value) {
-              if (value == true) {
-                _insertTipo(nomeTipo);
-                _insertProdotto(context, newProdotto!);
-              }
-            });
-          } else {
-            _insertProdotto(context, newProdotto!);
-          }
-        }
-      });
-    } else {
-      if (!containsIgnoreCase(prodotti.keys, nomeTipo)) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Conferma'),
-              content:
-                  Text('Vuoi inserire il nuovo tipo "$nomeTipo" nel sistema?'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(
-                        context, false); // Chiude il dialogo senza confermare
-                  },
-                  child: const Text('Annulla'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(
-                        context, true); // Chiude il dialogo e conferma
-                  },
-                  child: const Text('Conferma'),
-                ),
-              ],
-            );
-          },
-        ).then((value) {
-          if (value == true) {
-            _insertTipo(nomeTipo);
-            _insertProdotto(context, newProdotto!);
-          }
-        });
-      }
-    }
-  } else {
-    _insertProdotto(context, newProdotto!);
   }
 }

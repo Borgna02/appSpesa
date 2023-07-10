@@ -30,7 +30,7 @@ class SorgenteChoiceBox extends StatelessWidget {
                 ],
               ),
               onTap: () {
-                Navigator.of(context).pop(ImageSource.gallery);
+                Navigator.of(context).pop(ImageSource.camera);
               },
             ),
             const SizedBox(height: 16),
@@ -52,7 +52,7 @@ class SorgenteChoiceBox extends StatelessWidget {
                 ],
               ),
               onTap: () {
-                Navigator.of(context).pop(ImageSource.camera);
+                Navigator.of(context).pop(ImageSource.gallery);
               },
             ),
           ],

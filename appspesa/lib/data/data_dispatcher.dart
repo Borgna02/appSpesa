@@ -3,8 +3,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:appspesa/pages/aggiungi_prodotto_page.dart';
+import 'package:appspesa/widgets/conferma_marca.dart';
+import 'package:appspesa/widgets/conferma_tipo.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mysql_client/exception.dart';
+
 import '../connection/connection_railway.dart';
 import '../domain/prodotto.dart';
+import '../utilities/utilities.dart';
 
 Map<String, List<Prodotto>> prodotti = {};
 List<String> marche = [];
@@ -64,4 +72,118 @@ Future<void> loadData() async {
   await conn.close();
 
   return;
+}
+
+void marcaTipoCheck(
+    BuildContext context, Prodotto? vecchioProdotto, Prodotto nuovoProdotto) {
+  if (!containsIgnoreCase(marche, nuovoProdotto.nomeMarca) ||
+      !containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
+    // se bisogna aggiungere uno tra tipo e marca
+    if (!containsIgnoreCase(marche, nuovoProdotto.nomeMarca)) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ConfermaMarca(nomeMarca: nuovoProdotto.nomeMarca);
+        },
+      ).then((value) {
+        if (value == true) {
+          insertMarca(nuovoProdotto.nomeMarca);
+          if (!containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
+                }).then((value) {
+              if (value == true) {
+                _insertTipo(nuovoProdotto.nomeTipo);
+                _insertOrUpdateProdotto(
+                    context, vecchioProdotto, nuovoProdotto);
+              }
+            });
+          } else {
+            _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+          }
+        }
+      });
+    } else {
+      if (!containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
+          },
+        ).then((value) {
+          if (value == true) {
+            _insertTipo(nuovoProdotto.nomeTipo);
+            _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+          }
+        });
+      }
+    }
+  } else {
+    _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+  }
+}
+
+void _insertOrUpdateProdotto(
+    BuildContext context, Prodotto? vecchioProdotto, Prodotto nuovoProdotto) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return const AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Inserimento in corso...'),
+          ],
+        ),
+      );
+    },
+  );
+
+  try {
+    insertOrUpdateProdotto(vecchioProdotto, nuovoProdotto).then((_) {
+      Navigator.of(context)
+          .pop(); // Chiude la AlertDialog del progress indicator
+
+      Fluttertoast.showToast(
+        msg: 'Prodotto inserito correttamente',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 2,
+      );
+
+      Navigator.of(context).pop({
+        'tipoAdded': newTipo,
+        'prodottoAdded': nuovoProdotto,
+      });
+    }).catchError((e) {
+      Navigator.of(context)
+          .pop(); // Chiude la AlertDialog del progress indicator
+
+      if (e is MySQLServerException && e.errorCode == 1062) {
+        // Gestione specifica per l'eccezione Duplicate entry
+        Fluttertoast.showToast(
+          msg: 'Prodotto già presente nel sistema',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 2,
+        );
+      } else {
+        // Gestione generica per altre eccezioni
+        print('Errore: ${e.toString()}');
+      }
+    });
+  } catch (e) {
+    Navigator.of(context).pop(); // Chiude la AlertDialog del progress indicator
+    print('Errore: ${e.toString()}');
+  }
+}
+
+void _insertTipo(String tipo) {
+  insertTipo(tipo);
+  newTipo = tipo;
 }
