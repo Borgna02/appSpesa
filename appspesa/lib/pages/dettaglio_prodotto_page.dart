@@ -53,7 +53,7 @@ class _DettaglioProdottoPageState extends State<DettaglioProdottoPage> {
         children: [
           Opacity(
             opacity: _opacity,
-            child: Container(
+            child: SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.width,
               child: Align(
@@ -62,7 +62,7 @@ class _DettaglioProdottoPageState extends State<DettaglioProdottoPage> {
                   opacity: _opacity,
                   child: Image.memory(
                     widget.prodotto.immagine!,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.none,
                   ),
                 ),
               ),

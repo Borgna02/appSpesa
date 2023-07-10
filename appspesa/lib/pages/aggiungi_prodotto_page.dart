@@ -45,7 +45,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
   }
 
   Future<void> _pickImage() async {
-    final pickedImage = await imageHelper.pickImage();
+    final pickedImage = await imageHelper.pickImage(context: context);
 
     if (pickedImage != null) {
       final croppedFile = await imageHelper.crop(
