@@ -1,4 +1,4 @@
-import 'package:appspesa/widgets/dettagli_container.dart';
+import 'package:appspesa/pages/dettagli_container.dart';
 import 'package:flutter/material.dart';
 
 import '../domain/prodotto.dart';
@@ -76,7 +76,7 @@ class _DettaglioProdottoPageState extends State<DettaglioProdottoPage> {
                       0.5), // Altezza iniziale in cui inizia lo scroll
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [DettagliContainer(prodotto: widget.prodotto)],
+                children: [DettagliContainer(vecchioProdotto: widget.prodotto)],
               ),
             ),
           ),

@@ -20,7 +20,6 @@ class AggiungiProdottoPage extends StatefulWidget {
 }
 
 Prodotto? newProdotto;
-String? newTipo;
 final ImageHelper imageHelper = ImageHelper();
 
 class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
@@ -77,7 +76,7 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
             onPressed: () {
               // Azione da eseguire quando viene premuto il tasto di ritorno
               Navigator.of(context).pop({
-                'tipoAdded': newTipo,
+                'tipoAdded': newProdotto?.nomeTipo,
                 'prodottoAdded': newProdotto,
               });
             },

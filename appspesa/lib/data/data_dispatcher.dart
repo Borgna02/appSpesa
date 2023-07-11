@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:appspesa/pages/aggiungi_prodotto_page.dart';
 import 'package:appspesa/widgets/conferma_marca.dart';
 import 'package:appspesa/widgets/conferma_tipo.dart';
 import 'package:flutter/material.dart';
@@ -95,7 +94,7 @@ void marcaTipoCheck(
                   return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
                 }).then((value) {
               if (value == true) {
-                _insertTipo(nuovoProdotto.nomeTipo);
+                insertTipo(nuovoProdotto.nomeTipo);
                 _insertOrUpdateProdotto(
                     context, vecchioProdotto, nuovoProdotto);
               }
@@ -114,7 +113,7 @@ void marcaTipoCheck(
           },
         ).then((value) {
           if (value == true) {
-            _insertTipo(nuovoProdotto.nomeTipo);
+            insertTipo(nuovoProdotto.nomeTipo);
             _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
           }
         });
@@ -157,7 +156,7 @@ void _insertOrUpdateProdotto(
       );
 
       Navigator.of(context).pop({
-        'tipoAdded': newTipo,
+        'tipoAdded': nuovoProdotto.nomeTipo,
         'prodottoAdded': nuovoProdotto,
       });
     }).catchError((e) {
@@ -181,9 +180,4 @@ void _insertOrUpdateProdotto(
     Navigator.of(context).pop(); // Chiude la AlertDialog del progress indicator
     print('Errore: ${e.toString()}');
   }
-}
-
-void _insertTipo(String tipo) {
-  insertTipo(tipo);
-  newTipo = tipo;
 }

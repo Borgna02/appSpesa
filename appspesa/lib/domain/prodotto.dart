@@ -18,4 +18,31 @@ class Prodotto {
     this.isPiaciuto,
     this.immagine,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Prodotto &&
+        runtimeType == other.runtimeType &&
+        nome == other.nome &&
+        nomeMarca == other.nomeMarca &&
+        nomeTipo == other.nomeTipo &&
+        isDaRicomprare == other.isDaRicomprare &&
+        isPiaciuto == other.isPiaciuto;
+  }
+
+  @override
+  int get hashCode {
+    return nome.hashCode ^
+        nomeMarca.hashCode ^
+        nomeTipo.hashCode ^
+        isDaRicomprare.hashCode ^
+        isPiaciuto.hashCode;
+  }
+
+  @override
+  String toString() {
+    return 'Prodotto(id: $id, nome: $nome, nomeMarca: $nomeMarca, nomeTipo: $nomeTipo, isDaRicomprare: $isDaRicomprare, isPiaciuto: $isPiaciuto)';
+  }
 }
