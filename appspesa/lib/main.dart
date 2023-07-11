@@ -24,6 +24,6 @@ void bloccaRotazione() {
   ]);
 }
 
-// TODO aggiungere tasto elimina tipo quando un tipo non ha prodotti associati
+// TODO aggiungere "non ci sono prodotti di questo tipo" e elimina tipo quando un tipo non ha prodotti associati
 // TODO ordinare le chiavi della mappa prodotti ignorando il case
-// TODO aggiungere circularProgressIndicator anche durante l'aggiunta del tipo (unire aggiunta tipo e prodotto in un unico metodo)
+// TODO settare come valore default del votazioneButton quello del vecchioProdotto

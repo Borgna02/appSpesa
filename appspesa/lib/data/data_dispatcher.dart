@@ -88,13 +88,13 @@ void marcaTipoCheck(
                   return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
                 }).then((value) async {
               if (value == true) {
-                await insertTipo(nuovoProdotto.nomeTipo);
                 _insertOrUpdateProdotto(
-                    context, vecchioProdotto, nuovoProdotto);
+                    context, vecchioProdotto, nuovoProdotto, true);
               }
             });
           } else {
-            _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+            _insertOrUpdateProdotto(
+                context, vecchioProdotto, nuovoProdotto, false);
           }
         }
       });
@@ -105,21 +105,21 @@ void marcaTipoCheck(
           builder: (BuildContext context) {
             return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
           },
-        ).then((value) async {
+        ).then((value) {
           if (value == true) {
-            await insertTipo(nuovoProdotto.nomeTipo);
-            _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+            _insertOrUpdateProdotto(
+                context, vecchioProdotto, nuovoProdotto, true);
           }
         });
       }
     }
   } else {
-    _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
+    _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto, false);
   }
 }
 
-void _insertOrUpdateProdotto(
-    BuildContext context, Prodotto? vecchioProdotto, Prodotto nuovoProdotto) {
+Future<void> _insertOrUpdateProdotto(BuildContext context,
+    Prodotto? vecchioProdotto, Prodotto nuovoProdotto, bool addTipo) async {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -138,6 +138,9 @@ void _insertOrUpdateProdotto(
   );
 
   try {
+    if (addTipo) {
+      await insertTipo(nuovoProdotto.nomeTipo);
+    }
     insertOrUpdateProdotto(vecchioProdotto, nuovoProdotto).then((_) {
       Navigator.of(context)
           .pop(); // Chiude la AlertDialog del progress indicator
