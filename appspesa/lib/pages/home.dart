@@ -94,11 +94,21 @@ class _HomeState extends State<Home> {
                   trailing: Icon(iconData),
                   onTap: () {
                     Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DettaglioProdottoPage(prodotto: prodotto),
-                      ),
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    DettaglioProdottoPage(prodotto: prodotto)))
+                        .then(
+                      (result) {
+                        if (result != null && result['tipoAdded'] != null) {
+                          tabWidgets.add(Tab(
+                            text: result['tipoAdded'],
+                          ));
+                        }
+                        if (result != null && result['prodottoAdded'] != null) {
+                          setState(() {});
+                        }
+                      },
                     );
                   },
                 );

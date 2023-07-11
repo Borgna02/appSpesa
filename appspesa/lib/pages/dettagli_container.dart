@@ -98,7 +98,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     },
                   )
                 : Text(
-                    widget.vecchioProdotto.nome,
+                    nuovoProdotto!.nome,
                     style: const TextStyle(
                         fontSize: 24, fontWeight: FontWeight.bold),
                   ),
@@ -128,7 +128,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     },
                   )
                 : Text(
-                    'Marca: ${widget.vecchioProdotto.nomeMarca}',
+                    'Marca: ${nuovoProdotto!.nomeMarca}',
                     style: const TextStyle(fontSize: 18),
                   ),
             ListView.builder(
@@ -182,7 +182,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     },
                   )
                 : Text(
-                    'Tipo: ${widget.vecchioProdotto.nomeTipo}',
+                    'Tipo: ${nuovoProdotto!.nomeTipo}',
                     style: const TextStyle(fontSize: 18),
                   ),
             ClipRect(
@@ -252,18 +252,18 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     final nomeTipo = tipoController.text;
 
                     nuovoProdotto = Prodotto(
-                      id: null,
+                      id: widget.vecchioProdotto.id,
                       nome: nomeValue,
                       nomeMarca: nomeMarca,
                       nomeTipo: nomeTipo,
                       isDaRicomprare: selectedIsDaRicomprare,
                       isPiaciuto: selectedIsPiaciuto,
+                      immagine: widget.vecchioProdotto.immagine,
                     );
 
                     if (nuovoProdotto != widget.vecchioProdotto) {
-                      //TODO inserire codice di salvataggio delle modifiche
-                      // marcaTipoCheck(
-                      //     context, widget.vecchioProdotto, nuovoProdotto!);
+                      marcaTipoCheck(
+                          context, widget.vecchioProdotto, nuovoProdotto!);
                     }
 
                     setState(() {

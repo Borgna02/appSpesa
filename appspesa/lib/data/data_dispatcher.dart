@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
 import 'dart:typed_data';
@@ -23,48 +23,42 @@ Future<void> loadData() async {
   for (var row in results.rows) {
     marche.add(row.colAt(0)!);
   }
+  print("Fine prima query");
+
+  results = await conn.execute('SELECT * FROM tipo');
+  for (var row in results.rows) {
+    prodotti[row.colAt(0)!] = [];
+  }
+  print("Fine seconda query");
 
   // Esegue la query per ottenere i dati dal database
-  results = await conn.execute('SELECT * FROM tipo');
-  // Map<String, List<Prodotto>> prodotti = {};
-  for (var row in results.rows) {
-    String? value = row.colAt(0);
-    if (value != null) {
-      List<Prodotto> prodottiList = [];
-      var otherResult = await conn.execute(
-          'SELECT * FROM prodotto WHERE nome_tipo = :tipo', {'tipo': value});
+  results = await conn.execute('SELECT * FROM prodotto');
+  print("Fine terza query");
 
-      for (var prodotto in otherResult.rows) {
-        int idProdotto = int.parse(prodotto.colAt(0) as String);
-        String nomeProdotto = prodotto.colAt(1) as String;
-        String nomeMarca = prodotto.colAt(2) as String;
-        String nomeTipo = value;
-        bool isDaRicomprare = (prodotto.colAt(4) == '1');
-        bool? isPiaciuto;
+  for (var prodotto in results.rows) {
+    bool? isPiaciuto;
 
-        if (prodotto.colAt(5) != null) {
-          isPiaciuto = (prodotto.colAt(5) == "1");
-        }
-        Uint8List? immagine;
-        if (prodotto.colAt(6) == null) {
-          immagine = null;
-        } else {
-          immagine = base64
-              .decode(prodotto.colAt(6) as String); // Valore BLOB come stringa
-        }
-
-        prodottiList.add(Prodotto(
-            id: idProdotto,
-            nome: nomeProdotto,
-            nomeMarca: nomeMarca,
-            nomeTipo: nomeTipo,
-            isDaRicomprare: isDaRicomprare,
-            isPiaciuto: isPiaciuto,
-            immagine: immagine));
-      }
-
-      prodotti[value] = prodottiList;
+    if (prodotto.colAt(5) != null) {
+      isPiaciuto = (prodotto.colAt(5) == "1");
     }
+    Uint8List? immagine;
+    if (prodotto.colAt(6) == null) {
+      immagine = null;
+    } else {
+      immagine = base64
+          .decode(prodotto.colAt(6) as String); // Valore BLOB come stringa
+    }
+
+    var nuovoProdotto = Prodotto(
+        id: int.parse(prodotto.colAt(0) as String),
+        nome: prodotto.colAt(1) as String,
+        nomeMarca: prodotto.colAt(2) as String,
+        nomeTipo: prodotto.colAt(3) as String,
+        isDaRicomprare: (prodotto.colAt(4) == '1'),
+        isPiaciuto: isPiaciuto,
+        immagine: immagine);
+
+    insertProdottoRAM(nuovoProdotto);
   }
 
   print("Disconnected from database");
@@ -92,9 +86,9 @@ void marcaTipoCheck(
                 context: context,
                 builder: (BuildContext context) {
                   return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
-                }).then((value) {
+                }).then((value) async {
               if (value == true) {
-                insertTipo(nuovoProdotto.nomeTipo);
+                await insertTipo(nuovoProdotto.nomeTipo);
                 _insertOrUpdateProdotto(
                     context, vecchioProdotto, nuovoProdotto);
               }
@@ -111,9 +105,9 @@ void marcaTipoCheck(
           builder: (BuildContext context) {
             return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
           },
-        ).then((value) {
+        ).then((value) async {
           if (value == true) {
-            insertTipo(nuovoProdotto.nomeTipo);
+            await insertTipo(nuovoProdotto.nomeTipo);
             _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto);
           }
         });
@@ -157,6 +151,7 @@ void _insertOrUpdateProdotto(
 
       Navigator.of(context).pop({
         'tipoAdded': nuovoProdotto.nomeTipo,
+        'prodottoEdited': vecchioProdotto,
         'prodottoAdded': nuovoProdotto,
       });
     }).catchError((e) {
@@ -180,4 +175,33 @@ void _insertOrUpdateProdotto(
     Navigator.of(context).pop(); // Chiude la AlertDialog del progress indicator
     print('Errore: ${e.toString()}');
   }
+}
+
+void insertProdottoRAM(Prodotto nuovoProdotto) {
+  if (prodotti.containsKey(nuovoProdotto.nomeTipo)) {
+    // Se il tipo è già presente, aggiungo il prodotto alla lista corrispondente
+    prodotti[nuovoProdotto.nomeTipo]?.add(nuovoProdotto);
+  } else {
+    // Se il tipo non è presente, creo una nuova lista con il prodotto e la aggiungo alla mappa
+    insertKeyInAlphOrder(prodotti, nuovoProdotto.nomeTipo, nuovoProdotto);
+    // prodotti[nuovoProdotto.nomeTipo] = [nuovoProdotto];
+  }
+}
+
+void insertKeyInAlphOrder(
+    Map<String, List<Prodotto>> map, String newKey, Prodotto value) {
+  List<String> sortedKeys = map.keys.toList();
+  sortedKeys.add(newKey);
+  sortedKeys.sort();
+
+  Map<String, List<Prodotto>> newMap = {};
+  for (String key in sortedKeys) {
+    if (key == newKey) {
+      newMap[key] = [value];
+    } else {
+      newMap[key] = map[key]!;
+    }
+  }
+
+  prodotti = newMap;
 }
