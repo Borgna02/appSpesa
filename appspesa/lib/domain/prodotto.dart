@@ -26,8 +26,8 @@ class Prodotto {
     return other is Prodotto &&
         runtimeType == other.runtimeType &&
         nome == other.nome &&
-        nomeMarca == other.nomeMarca &&
-        nomeTipo == other.nomeTipo &&
+        nomeMarca.toLowerCase() == other.nomeMarca.toLowerCase() &&
+        nomeTipo.toLowerCase() == other.nomeTipo.toLowerCase() &&
         isDaRicomprare == other.isDaRicomprare &&
         isPiaciuto == other.isPiaciuto;
   }

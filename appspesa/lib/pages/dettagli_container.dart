@@ -96,7 +96,10 @@ class _DettagliContainerState extends State<DettagliContainer> {
                       }
                       return null;
                     },
-                  )
+                    onTap: () {
+                      _clearMarcaSuggestions();
+                      _clearTipoSuggestions();
+                    })
                 : Text(
                     nuovoProdotto!.nome,
                     style: const TextStyle(
@@ -185,8 +188,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     'Tipo: ${nuovoProdotto!.nomeTipo}',
                     style: const TextStyle(fontSize: 18),
                   ),
-            ClipRect(
-                child: ListView.builder(
+            ListView.builder(
               shrinkWrap: true,
               itemCount: _tipoSuggestions.length,
               itemBuilder: (BuildContext context, int index) {
@@ -209,7 +211,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                       },
                     ));
               },
-            )),
+            ),
             const SizedBox(height: 5),
             Row(
               children: [
@@ -223,6 +225,9 @@ class _DettagliContainerState extends State<DettagliContainer> {
                         VotazioneButton(onVoteSelected: (vote) {
                           // Al nuovo prodotto viene assegnato il nuovo valore scelto
                           selectedIsPiaciuto = vote;
+
+                          _clearMarcaSuggestions();
+                          _clearTipoSuggestions();
                         }),
                         const SizedBox(height: 20),
                       ])
@@ -237,6 +242,9 @@ class _DettagliContainerState extends State<DettagliContainer> {
                       const SizedBox(height: 20),
                       SiNoButton(onVoteSelected: (vote) {
                         selectedIsDaRicomprare = vote!;
+
+                        _clearTipoSuggestions();
+                        _clearMarcaSuggestions();
                       }),
                       const SizedBox(height: 20),
                     ])
@@ -245,6 +253,8 @@ class _DettagliContainerState extends State<DettagliContainer> {
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
+                _clearMarcaSuggestions();
+                _clearTipoSuggestions();
                 if (isModifying) {
                   if (_formKey.currentState!.validate()) {
                     final nomeValue = nomeController.text;

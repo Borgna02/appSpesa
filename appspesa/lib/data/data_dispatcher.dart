@@ -69,6 +69,7 @@ Future<void> loadData() async {
 
 void marcaTipoCheck(
     BuildContext context, Prodotto? vecchioProdotto, Prodotto nuovoProdotto) {
+  print(containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo));
   if (!containsIgnoreCase(marche, nuovoProdotto.nomeMarca) ||
       !containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
     // se bisogna aggiungere uno tra tipo e marca
@@ -114,6 +115,20 @@ void marcaTipoCheck(
       }
     }
   } else {
+
+    // in questo modo evito di inserire nella mappa più chiavi uguali ma con lettere maiuscole diverse
+    for (String key in prodotti.keys) {
+      if (key.toLowerCase() == nuovoProdotto.nomeTipo.toLowerCase()) {
+        nuovoProdotto.nomeTipo = key;
+      }
+    }
+
+    // stesso procedimento per la marca
+    for (String marca in marche) {
+      if (marca.toLowerCase() == nuovoProdotto.nomeMarca.toLowerCase()) {
+        nuovoProdotto.nomeMarca = marca;
+      }
+    }
     _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto, false);
   }
 }
@@ -195,7 +210,11 @@ void insertKeyInAlphOrder(
     Map<String, List<Prodotto>> map, String newKey, Prodotto value) {
   List<String> sortedKeys = map.keys.toList();
   sortedKeys.add(newKey);
-  sortedKeys.sort();
+  sortedKeys = mergeSortIgnoreCase(sortedKeys);
+
+  for (String a in sortedKeys) {
+    print(a);
+  }
 
   Map<String, List<Prodotto>> newMap = {};
   for (String key in sortedKeys) {
