@@ -75,7 +75,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
     }
 
     return Container(
-      height: 800, // Altezza del riquadro con i dettagli
+      height: 1500, // Altezza del riquadro con i dettagli
       color: Colors.white,
       padding: const EdgeInsets.all(16),
       child: Form(

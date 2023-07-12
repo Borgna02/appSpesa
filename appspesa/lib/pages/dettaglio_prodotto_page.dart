@@ -73,7 +73,7 @@ class _DettaglioProdottoPageState extends State<DettaglioProdottoPage> {
             child: Padding(
               padding: EdgeInsets.only(
                   top: MediaQuery.of(context).size.height *
-                      0.5), // Altezza iniziale in cui inizia lo scroll
+                      0.45), // Altezza iniziale in cui inizia lo scroll
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [DettagliContainer(vecchioProdotto: widget.prodotto)],
