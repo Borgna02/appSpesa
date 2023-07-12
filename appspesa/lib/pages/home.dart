@@ -1,5 +1,6 @@
 import 'package:appspesa/data/data_dispatcher.dart';
 import 'package:appspesa/pages/mytheme.dart';
+import 'package:appspesa/utilities/utilities.dart';
 import 'package:flutter/material.dart';
 import 'aggiungi_prodotto_page.dart';
 import 'dettaglio_prodotto_page.dart';
@@ -13,6 +14,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool? primaIsDaRicomprare;
+  bool? primaPiaciuti;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -55,6 +58,32 @@ class _HomeState extends State<Home> {
             isScrollable: true,
             tabs: tabWidgets,
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.sort),
+              onPressed: () {
+                if (primaIsDaRicomprare == null) {
+                  primaIsDaRicomprare = true;
+                } else {
+                  primaIsDaRicomprare = !primaIsDaRicomprare!;
+                }
+                sortByIsDaRicomprare(primaIsDaRicomprare!);
+                setState(() {});
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.thumbs_up_down_outlined),
+              onPressed: () {
+                if (primaPiaciuti == null) {
+                  primaPiaciuti = true;
+                } else {
+                  primaPiaciuti = !primaPiaciuti!;
+                }
+                sortByIsPiaciuto(primaPiaciuti!);
+                setState(() {});
+              },
+            )
+          ],
         ),
         body: TabBarView(
           children: prodotti.keys.map((key) {
@@ -136,6 +165,38 @@ class _HomeState extends State<Home> {
           child: const Icon(Icons.add),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+//! Soluzione non funzionante con doppio floatingActionButton
+        /* floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+                onPressed: () {
+                  print("primo tasto");
+                },
+                child: const Icon(Icons.sort)),
+            const SizedBox(width: 10),
+            FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              const AggiungiProdottoPage())).then((result) {
+                    if (result != null && result['tipoAdded'] != null) {
+                      tabWidgets.add(Tab(
+                        text: result['tipoAdded'],
+                      ));
+                    }
+                    if (result != null && result['prodottoAdded'] != null) {
+                      setState(() {});
+                    }
+                  });
+                },
+                child: const Icon(Icons.add)),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, */
       ),
     );
   }

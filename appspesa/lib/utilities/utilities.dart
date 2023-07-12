@@ -91,3 +91,27 @@ void sortByIsDaRicomprare(bool primaDaRicomprare) {
     }
   }
 }
+
+void sortByIsPiaciuto(bool primaPiaciuti) {
+  for (var key in prodotti.keys) {
+    List<Prodotto> piaciuti = [];
+    List<Prodotto> nonPiaciuti = [];
+    List<Prodotto> inAttesa = [];
+
+    for (var prodotto in prodotti[key]!) {
+      if (prodotto.isPiaciuto == true) {
+        piaciuti.add(prodotto);
+      } else if (prodotto.isPiaciuto == null) {
+        inAttesa.add(prodotto);
+      } else {
+        nonPiaciuti.add(prodotto);
+      }
+    }
+
+    if (primaPiaciuti) {
+      prodotti[key] = piaciuti + inAttesa + nonPiaciuti;
+    } else {
+      prodotti[key] = nonPiaciuti + inAttesa + piaciuti;
+    }
+  }
+}
