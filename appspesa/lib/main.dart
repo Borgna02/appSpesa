@@ -25,5 +25,3 @@ void bloccaRotazione() {
 }
 
 // TODO aggiungere "non ci sono prodotti di questo tipo" e elimina tipo quando un tipo non ha prodotti associati
-// TODO ordinare le chiavi della mappa prodotti ignorando il case
-// TODO settare come valore default del votazioneButton quello del vecchioProdotto

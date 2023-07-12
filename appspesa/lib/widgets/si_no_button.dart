@@ -6,8 +6,10 @@ import '../pages/mytheme.dart';
 
 class SiNoButton extends StatefulWidget {
   final void Function(bool?)? onVoteSelected;
+  final bool defaultIsDaRicomprare;
 
-  const SiNoButton({Key? key, this.onVoteSelected}) : super(key: key);
+  const SiNoButton({Key? key, this.onVoteSelected, required this.defaultIsDaRicomprare})
+      : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -16,7 +18,17 @@ class SiNoButton extends StatefulWidget {
 
 class _SiNoButtonState extends State<SiNoButton> {
   // in questo modo di default la selezione è impostata sull'orologio
-  List<bool> _selections = [false, true];
+  late List<bool> _selections;
+  @override
+  initState() {
+    super.initState();
+    if (widget.defaultIsDaRicomprare) {
+      _selections = [true, false];
+    } else {
+      _selections = [false, true];
+    }
+  }
+
   bool? isDaRicomprare;
 
   void _setSelection(int index) {

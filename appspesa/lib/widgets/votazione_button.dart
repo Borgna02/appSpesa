@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import '../pages/mytheme.dart';
 
 class VotazioneButton extends StatefulWidget {
+  final bool? defaultVote;
   final void Function(bool?)? onVoteSelected;
 
-  const VotazioneButton({Key? key, this.onVoteSelected}) : super(key: key);
+  const VotazioneButton({Key? key, this.onVoteSelected, this.defaultVote})
+      : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -15,8 +17,19 @@ class VotazioneButton extends StatefulWidget {
 }
 
 class _VotazioneButtonState extends State<VotazioneButton> {
-  // in questo modo di default la selezione è impostata sull'orologio
-  List<bool> _selections = [false, true, false];
+  late List<bool> _selections;
+  @override
+  initState() {
+    super.initState();
+    if (widget.defaultVote == null) {
+      _selections = [false, true, false];
+    } else if (widget.defaultVote == true) {
+      _selections = [true, false, false];
+    } else {
+      _selections = [false, false, true];
+    }
+  }
+
   bool? isPiaciuto;
 
   void _setSelection(int index) {

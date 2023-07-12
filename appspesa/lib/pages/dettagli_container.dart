@@ -220,17 +220,21 @@ class _DettagliContainerState extends State<DettagliContainer> {
                   style: TextStyle(fontSize: 18),
                 ),
                 isModifying
-                    ? Column(children: [
-                        const SizedBox(height: 20),
-                        VotazioneButton(onVoteSelected: (vote) {
-                          // Al nuovo prodotto viene assegnato il nuovo valore scelto
-                          selectedIsPiaciuto = vote;
+                    ? Column(
+                        children: [
+                          const SizedBox(height: 20),
+                          VotazioneButton(
+                              onVoteSelected: (vote) {
+                                // Al nuovo prodotto viene assegnato il nuovo valore scelto
+                                selectedIsPiaciuto = vote;
 
-                          _clearMarcaSuggestions();
-                          _clearTipoSuggestions();
-                        }),
-                        const SizedBox(height: 20),
-                      ])
+                                _clearMarcaSuggestions();
+                                _clearTipoSuggestions();
+                              },
+                              defaultVote: widget.vecchioProdotto.isPiaciuto),
+                          const SizedBox(height: 20),
+                        ],
+                      )
                     : piaciutoIcon
               ],
             ),
@@ -240,12 +244,15 @@ class _DettagliContainerState extends State<DettagliContainer> {
               isModifying
                   ? Column(children: [
                       const SizedBox(height: 20),
-                      SiNoButton(onVoteSelected: (vote) {
-                        selectedIsDaRicomprare = vote!;
+                      SiNoButton(
+                          onVoteSelected: (vote) {
+                            selectedIsDaRicomprare = vote!;
 
-                        _clearTipoSuggestions();
-                        _clearMarcaSuggestions();
-                      }),
+                            _clearTipoSuggestions();
+                            _clearMarcaSuggestions();
+                          },
+                          defaultIsDaRicomprare:
+                              widget.vecchioProdotto.isDaRicomprare),
                       const SizedBox(height: 20),
                     ])
                   : isDaRicomprareText
