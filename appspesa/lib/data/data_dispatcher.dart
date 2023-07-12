@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -67,12 +68,12 @@ Future<void> loadData() async {
   return;
 }
 
-void marcaTipoCheck(
-    BuildContext context, Prodotto? vecchioProdotto, Prodotto nuovoProdotto) {
-  print(containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo));
+Future<bool> marcaTipoCheck(BuildContext context, Prodotto? vecchioProdotto,
+    Prodotto nuovoProdotto) async {
+  Completer<bool> completer = Completer<bool>();
+
   if (!containsIgnoreCase(marche, nuovoProdotto.nomeMarca) ||
       !containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
-    // se bisogna aggiungere uno tra tipo e marca
     if (!containsIgnoreCase(marche, nuovoProdotto.nomeMarca)) {
       showDialog(
         context: context,
@@ -81,22 +82,37 @@ void marcaTipoCheck(
         },
       ).then((value) {
         if (value == true) {
-          insertMarca(nuovoProdotto.nomeMarca);
           if (!containsIgnoreCase(prodotti.keys, nuovoProdotto.nomeTipo)) {
             showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
-                }).then((value) async {
+              context: context,
+              builder: (BuildContext context) {
+                return ConfermaTipo(nomeTipo: nuovoProdotto.nomeTipo);
+              },
+            ).then((value) {
               if (value == true) {
                 _insertOrUpdateProdotto(
-                    context, vecchioProdotto, nuovoProdotto, true);
+                        context, vecchioProdotto, nuovoProdotto, true, true)
+                    .then((result) {
+                  completer.complete(true);
+                });
+              } else {
+                completer.complete(false);
               }
             });
           } else {
+            for (String key in prodotti.keys) {
+              if (key.toLowerCase() == nuovoProdotto.nomeTipo.toLowerCase()) {
+                nuovoProdotto.nomeTipo = key;
+              }
+            }
             _insertOrUpdateProdotto(
-                context, vecchioProdotto, nuovoProdotto, false);
+                    context, vecchioProdotto, nuovoProdotto, false, true)
+                .then((result) {
+              completer.complete(true);
+            });
           }
+        } else {
+          completer.complete(false);
         }
       });
     } else {
@@ -109,32 +125,47 @@ void marcaTipoCheck(
         ).then((value) {
           if (value == true) {
             _insertOrUpdateProdotto(
-                context, vecchioProdotto, nuovoProdotto, true);
+                    context, vecchioProdotto, nuovoProdotto, true, false)
+                .then((result) {
+              completer.complete(true);
+            });
+          } else {
+            completer.complete(false);
           }
         });
+      } else {
+        completer.complete(false);
       }
     }
   } else {
-
-    // in questo modo evito di inserire nella mappa più chiavi uguali ma con lettere maiuscole diverse
     for (String key in prodotti.keys) {
       if (key.toLowerCase() == nuovoProdotto.nomeTipo.toLowerCase()) {
         nuovoProdotto.nomeTipo = key;
       }
     }
 
-    // stesso procedimento per la marca
     for (String marca in marche) {
       if (marca.toLowerCase() == nuovoProdotto.nomeMarca.toLowerCase()) {
         nuovoProdotto.nomeMarca = marca;
       }
     }
-    _insertOrUpdateProdotto(context, vecchioProdotto, nuovoProdotto, false);
+
+    _insertOrUpdateProdotto(
+            context, vecchioProdotto, nuovoProdotto, false, false)
+        .then((result) {
+      completer.complete(true);
+    });
   }
+
+  return completer.future;
 }
 
-Future<void> _insertOrUpdateProdotto(BuildContext context,
-    Prodotto? vecchioProdotto, Prodotto nuovoProdotto, bool addTipo) async {
+Future<void> _insertOrUpdateProdotto(
+    BuildContext context,
+    Prodotto? vecchioProdotto,
+    Prodotto nuovoProdotto,
+    bool addTipo,
+    bool addMarca) async {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -156,7 +187,10 @@ Future<void> _insertOrUpdateProdotto(BuildContext context,
     if (addTipo) {
       await insertTipo(nuovoProdotto.nomeTipo);
     }
-    insertOrUpdateProdotto(vecchioProdotto, nuovoProdotto).then((_) {
+    if (addMarca) {
+      await insertMarca(nuovoProdotto.nomeMarca);
+    }
+    await insertOrUpdateProdotto(vecchioProdotto, nuovoProdotto).then((_) {
       Navigator.of(context)
           .pop(); // Chiude la AlertDialog del progress indicator
 

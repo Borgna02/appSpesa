@@ -252,7 +252,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
             ]),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              onPressed: () {
+              onPressed: () async {
                 _clearMarcaSuggestions();
                 _clearTipoSuggestions();
                 if (isModifying) {
@@ -272,13 +272,28 @@ class _DettagliContainerState extends State<DettagliContainer> {
                     );
 
                     if (nuovoProdotto != widget.vecchioProdotto) {
-                      marcaTipoCheck(
-                          context, widget.vecchioProdotto, nuovoProdotto!);
+                      bool result = false;
+                      try {
+                        result = await marcaTipoCheck(
+                            context, widget.vecchioProdotto, nuovoProdotto!);
+                      } catch (error) {
+                        // Gestisci l'errore se si verifica durante marcaTipoCheck
+                      } finally {
+                        if (!result) {
+                          // se non ho salvato le modifiche ripristino il vecchio prodotto
+                          nuovoProdotto = widget.vecchioProdotto;
+                          setState(() {});
+                        } else {
+                          setState(() {
+                            isModifying = !isModifying;
+                          });
+                        }
+                      }
+                    } else {
+                      setState(() {
+                        isModifying = !isModifying;
+                      });
                     }
-
-                    setState(() {
-                      isModifying = !isModifying;
-                    });
                   }
                 } else {
                   setState(() {
