@@ -1,3 +1,6 @@
+import 'package:appspesa/data/data_dispatcher.dart';
+import 'package:appspesa/domain/prodotto.dart';
+
 bool containsIgnoreCase(Iterable<String> set, String element) {
   for (String e in set) {
     if (e.toLowerCase() == element.toLowerCase()) return true;
@@ -46,4 +49,45 @@ List<String> merge(List<String> left, List<String> right) {
   }
 
   return merged;
+}
+
+String capitalizeFirstForEachWord(String string) {
+  List<String> words = string.split(' ');
+  String result = "";
+  for (var word in words) {
+    if (result.isEmpty) {
+      result +=
+          word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
+    } else {
+      result +=
+          ' ${word.substring(0, 1).toUpperCase()}${word.substring(1).toLowerCase()}';
+    }
+  }
+  return result;
+}
+
+String capitalizeOnlyFirst(String string) {
+  return string.substring(0, 1).toUpperCase() +
+      string.substring(1).toLowerCase();
+}
+
+void sortByIsDaRicomprare(bool primaDaRicomprare) {
+  for (var key in prodotti.keys) {
+    List<Prodotto> daRicomprare = [];
+    List<Prodotto> nonDaRicomprare = [];
+
+    for (var prodotto in prodotti[key]!) {
+      if (prodotto.isDaRicomprare) {
+        daRicomprare.add(prodotto);
+      } else {
+        nonDaRicomprare.add(prodotto);
+      }
+    }
+
+    if (primaDaRicomprare) {
+      prodotti[key] = daRicomprare + nonDaRicomprare;
+    } else {
+      prodotti[key] = nonDaRicomprare + daRicomprare;
+    }
+  }
 }

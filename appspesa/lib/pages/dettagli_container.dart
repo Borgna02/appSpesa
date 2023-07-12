@@ -1,6 +1,7 @@
 import 'package:appspesa/data/data_dispatcher.dart';
 import 'package:appspesa/domain/prodotto.dart';
 import 'package:appspesa/pages/mytheme.dart';
+import 'package:appspesa/utilities/utilities.dart';
 import 'package:appspesa/widgets/si_no_button.dart';
 import 'package:appspesa/widgets/votazione_button.dart';
 import 'package:flutter/material.dart';
@@ -265,8 +266,9 @@ class _DettagliContainerState extends State<DettagliContainer> {
                 if (isModifying) {
                   if (_formKey.currentState!.validate()) {
                     final nomeValue = nomeController.text;
-                    final nomeMarca = marcaController.text;
-                    final nomeTipo = tipoController.text;
+                    final nomeMarca =
+                        capitalizeFirstForEachWord(marcaController.text);
+                    final nomeTipo = capitalizeOnlyFirst(tipoController.text);
 
                     nuovoProdotto = Prodotto(
                       id: widget.vecchioProdotto.id,

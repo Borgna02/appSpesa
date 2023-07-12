@@ -3,6 +3,7 @@
 import 'dart:typed_data';
 
 import 'package:appspesa/domain/prodotto.dart';
+import 'package:appspesa/utilities/utilities.dart';
 import 'package:appspesa/widgets/votazione_button.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -257,8 +258,10 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                             );
                           } else {
                             final nomeValue = _nomeController.text;
-                            final nomeMarca = _marcaController.text;
-                            final nomeTipo = _tipoController.text;
+                            final nomeMarca =
+                                capitalizeFirstForEachWord(_marcaController.text);
+                            final nomeTipo =
+                                capitalizeOnlyFirst(_tipoController.text);
                             bool isDaRicomprare = false;
 
                             final newProdotto = Prodotto(

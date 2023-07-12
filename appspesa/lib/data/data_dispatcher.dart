@@ -28,7 +28,7 @@ Future<void> loadData() async {
 
   results = await conn.execute('SELECT * FROM tipo');
   for (var row in results.rows) {
-    prodotti[row.colAt(0)!] = [];
+    prodotti[capitalizeOnlyFirst(row.colAt(0)!)] = [];
   }
   print("Fine seconda query");
 
@@ -230,6 +230,7 @@ Future<void> _insertOrUpdateProdotto(
 }
 
 void insertProdottoRAM(Prodotto nuovoProdotto) {
+  nuovoProdotto.nomeTipo = capitalizeOnlyFirst(nuovoProdotto.nomeTipo);
   if (prodotti.containsKey(nuovoProdotto.nomeTipo)) {
     // Se il tipo è già presente, aggiungo il prodotto alla lista corrispondente
     prodotti[nuovoProdotto.nomeTipo]?.add(nuovoProdotto);
@@ -245,10 +246,6 @@ void insertKeyInAlphOrder(
   List<String> sortedKeys = map.keys.toList();
   sortedKeys.add(newKey);
   sortedKeys = mergeSortIgnoreCase(sortedKeys);
-
-  for (String a in sortedKeys) {
-    print(a);
-  }
 
   Map<String, List<Prodotto>> newMap = {};
   for (String key in sortedKeys) {
