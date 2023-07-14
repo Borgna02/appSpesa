@@ -73,21 +73,47 @@ String capitalizeOnlyFirst(String string) {
 
 void sortByIsDaRicomprare(bool primaDaRicomprare) {
   for (var key in prodotti.keys) {
-    List<Prodotto> daRicomprare = [];
-    List<Prodotto> nonDaRicomprare = [];
+    List<Prodotto> daRicomprarePiaciuti = [];
+    List<Prodotto> daRicomprareNonVotati = [];
+    List<Prodotto> daRicomprareNonPiaciuti = [];
+    List<Prodotto> nonDaRicomprarePiaciuti = [];
+    List<Prodotto> nonDaRicomprareNonVotati = [];
+    List<Prodotto> nonDaRicomprareNonPiaciuti = [];
 
     for (var prodotto in prodotti[key]!) {
       if (prodotto.isDaRicomprare) {
-        daRicomprare.add(prodotto);
+        if (prodotto.isPiaciuto == true) {
+          daRicomprarePiaciuti.add(prodotto);
+        } else if (prodotto.isPiaciuto == null) {
+          daRicomprareNonVotati.add(prodotto);
+        } else {
+          daRicomprareNonPiaciuti.add(prodotto);
+        }
       } else {
-        nonDaRicomprare.add(prodotto);
+        if (prodotto.isPiaciuto == true) {
+          nonDaRicomprarePiaciuti.add(prodotto);
+        } else if (prodotto.isPiaciuto == null) {
+          nonDaRicomprareNonVotati.add(prodotto);
+        } else {
+          nonDaRicomprareNonPiaciuti.add(prodotto);
+        }
       }
     }
 
     if (primaDaRicomprare) {
-      prodotti[key] = daRicomprare + nonDaRicomprare;
+      prodotti[key] = daRicomprarePiaciuti +
+          daRicomprareNonVotati +
+          daRicomprareNonPiaciuti +
+          nonDaRicomprarePiaciuti +
+          nonDaRicomprareNonVotati +
+          nonDaRicomprareNonPiaciuti;
     } else {
-      prodotti[key] = nonDaRicomprare + daRicomprare;
+      prodotti[key] = nonDaRicomprarePiaciuti +
+          nonDaRicomprareNonVotati +
+          nonDaRicomprareNonPiaciuti +
+          daRicomprarePiaciuti +
+          daRicomprareNonVotati +
+          daRicomprareNonPiaciuti;
     }
   }
 }
