@@ -258,8 +258,8 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                             );
                           } else {
                             final nomeValue = _nomeController.text;
-                            final nomeMarca =
-                                capitalizeFirstForEachWord(_marcaController.text);
+                            final nomeMarca = capitalizeFirstForEachWord(
+                                _marcaController.text);
                             final nomeTipo =
                                 capitalizeOnlyFirst(_tipoController.text);
                             bool isDaRicomprare = false;
@@ -271,7 +271,8 @@ class _AggiungiProdottoPageState extends State<AggiungiProdottoPage> {
                                 nomeTipo: nomeTipo,
                                 isDaRicomprare: isDaRicomprare,
                                 isPiaciuto: _selectedVote,
-                                immagine: _selectedImage);
+                                immagine: _selectedImage,
+                                isDaMostrare: true);
 
                             marcaTipoCheck(context, null, newProdotto);
                           }

@@ -14,11 +14,20 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  TextEditingController searchController = TextEditingController();
   bool? primaIsDaRicomprare;
   bool? primaPiaciuti;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    fetchProdottoSuggestions(""); //resetto la ricerca
+    searchController.text = "";
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,9 +63,37 @@ class _HomeState extends State<Home> {
           },
           scrolledUnderElevation: 2.0,
           shadowColor: MyTheme.getThemeData().colorScheme.shadow,
-          bottom: TabBar(
-            isScrollable: true,
-            tabs: tabWidgets,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(
+                kToolbarHeight + 56.0), // Height of TabBar + SearchBar
+            child: Column(
+              children: [
+                TabBar(
+                  isScrollable: true,
+                  tabs: tabWidgets,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cerca',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 8.0), // Adjust the vertical padding
+                    ),
+                    onChanged: (value) {
+                      fetchProdottoSuggestions(value);
+                      setState(() {});
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
             IconButton(
@@ -110,57 +147,61 @@ class _HomeState extends State<Home> {
               return ListView.builder(
                 itemCount: prodotti[key]?.length,
                 itemBuilder: (BuildContext context, int index) {
-                  String? nomeProdotto = prodotti[key]?[index].nome;
-                  Prodotto prodotto = prodotti[key]![index];
-                  IconData iconData;
-                  if (prodotto.isPiaciuto == true) {
-                    iconData = Icons.thumb_up;
-                  } else if (prodotto.isPiaciuto == false) {
-                    iconData = Icons.thumb_down;
-                  } else {
-                    iconData = Icons.watch_later;
-                  }
+                  if (prodotti[key]![index].isDaMostrare == true) {
+                    String? nomeProdotto = prodotti[key]?[index].nome;
+                    Prodotto prodotto = prodotti[key]![index];
+                    IconData iconData;
+                    if (prodotto.isPiaciuto == true) {
+                      iconData = Icons.thumb_up;
+                    } else if (prodotto.isPiaciuto == false) {
+                      iconData = Icons.thumb_down;
+                    } else {
+                      iconData = Icons.watch_later;
+                    }
 
-                  return ListTile(
-                    tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                    title: Row(
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          margin: const EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: prodotto.isDaRicomprare
-                                ? Colors.red
-                                : Colors.green,
+                    return ListTile(
+                      tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                      title: Row(
+                        children: [
+                          Container(
+                            width: 12,
+                            height: 12,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: prodotto.isDaRicomprare
+                                  ? Colors.red
+                                  : Colors.green,
+                            ),
                           ),
-                        ),
-                        Text(nomeProdotto!),
-                      ],
-                    ),
-                    subtitle: Text(prodotto.nomeMarca),
-                    trailing: Icon(iconData),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DettaglioProdottoPage(
-                                  prodotto: prodotto))).then(
-                        (result) {
-                          if (result != null && result['tipoAdded'] != null) {
-                            tabWidgets.add(Tab(
-                              text: result['tipoAdded'],
-                            ));
-                          }
-                          if (result != null &&
-                              result['prodottoAdded'] != null) {
-                            setState(() {});
-                          }
-                        },
-                      );
-                    },
-                  );
+                          Text(nomeProdotto!),
+                        ],
+                      ),
+                      subtitle: Text(prodotto.nomeMarca),
+                      trailing: Icon(iconData),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DettaglioProdottoPage(
+                                    prodotto: prodotto))).then(
+                          (result) {
+                            if (result != null && result['tipoAdded'] != null) {
+                              tabWidgets.add(Tab(
+                                text: result['tipoAdded'],
+                              ));
+                            }
+                            if (result != null &&
+                                result['prodottoAdded'] != null) {
+                              setState(() {});
+                            }
+                            fetchProdottoSuggestions("");
+                            searchController.text = "";
+                          },
+                        );
+                      },
+                    );
+                  }
                 },
               );
             }
@@ -178,9 +219,9 @@ class _HomeState extends State<Home> {
                   text: result['tipoAdded'],
                 ));
               }
-              if (result != null && result['prodottoAdded'] != null) {
-                setState(() {});
-              }
+              fetchProdottoSuggestions("");
+              searchController.text = "";
+              setState(() {});
             });
           },
           child: const Icon(Icons.add),

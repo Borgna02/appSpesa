@@ -57,7 +57,8 @@ Future<void> loadData() async {
         nomeTipo: prodotto.colAt(3) as String,
         isDaRicomprare: (prodotto.colAt(4) == '1'),
         isPiaciuto: isPiaciuto,
-        immagine: immagine);
+        immagine: immagine,
+        isDaMostrare: true);
 
     insertProdottoRAM(nuovoProdotto);
   }
@@ -257,4 +258,24 @@ void insertKeyInAlphOrder(
   }
 
   prodotti = newMap;
+}
+
+void fetchProdottoSuggestions(String input) {
+  if (input.isEmpty) {
+    for (String tipo in prodotti.keys) {
+      for (Prodotto prodotto in prodotti[tipo]!) {
+        prodotto.isDaMostrare = true;
+      }
+    }
+  } else {
+    for (String tipo in prodotti.keys) {
+      for (Prodotto prodotto in prodotti[tipo]!) {
+        if (prodotto.nome.toLowerCase().contains(input.toLowerCase())) {
+          prodotto.isDaMostrare = true;
+        } else {
+          prodotto.isDaMostrare = false;
+        }
+      }
+    }
+  }
 }

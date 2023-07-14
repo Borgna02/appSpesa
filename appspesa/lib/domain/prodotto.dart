@@ -8,6 +8,7 @@ class Prodotto {
   bool isDaRicomprare;
   bool? isPiaciuto;
   Uint8List? immagine;
+  bool isDaMostrare;
 
   Prodotto({
     this.id,
@@ -17,6 +18,7 @@ class Prodotto {
     required this.isDaRicomprare,
     this.isPiaciuto,
     this.immagine,
+    required this.isDaMostrare,
   });
 
   @override

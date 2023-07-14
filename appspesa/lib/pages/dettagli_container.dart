@@ -47,7 +47,8 @@ class _DettagliContainerState extends State<DettagliContainer> {
         nomeTipo: widget.vecchioProdotto.nomeTipo,
         isDaRicomprare: widget.vecchioProdotto.isDaRicomprare,
         isPiaciuto: widget.vecchioProdotto.isPiaciuto,
-        immagine: widget.vecchioProdotto.immagine);
+        immagine: widget.vecchioProdotto.immagine,
+        isDaMostrare: widget.vecchioProdotto.isDaMostrare);
   }
 
   @override
@@ -278,6 +279,7 @@ class _DettagliContainerState extends State<DettagliContainer> {
                       isDaRicomprare: selectedIsDaRicomprare,
                       isPiaciuto: selectedIsPiaciuto,
                       immagine: widget.vecchioProdotto.immagine,
+                      isDaMostrare: widget.vecchioProdotto.isDaMostrare,
                     );
 
                     if (nuovoProdotto != widget.vecchioProdotto) {
