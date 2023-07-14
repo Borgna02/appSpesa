@@ -47,9 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key> NSPhotoLibraryUsageDescription</key>
+	<key>NSPhotoLibraryUsageDescription</key>
 	<string> Carica l'immagine del prodotto </string>
-	<key> NSCameraUsageDescription</key>
+	<key>NSCameraUsageDescription</key>
 	<string> Scatta l'immagine del prodotto </string>
 
 </dict>
