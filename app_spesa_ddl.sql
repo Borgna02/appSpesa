@@ -1,10 +1,10 @@
-DROP DATABASE IF EXISTS railway;
-CREATE DATABASE railway;
-USE railway;
+DROP DATABASE IF EXISTS appSpesaDB;
+CREATE DATABASE appSpesaDB;
+USE appSpesaDB;
 
-DROP USER IF EXISTS 'spesaUser'@'151.43.54.92';
-CREATE USER 'spesaUser'@'151.43.54.92' IDENTIFIED BY 'spesaPwd';
-GRANT select,insert,update,delete,execute ON railway.* TO 'spesaUser'@'151.43.54.92';
+DROP USER IF EXISTS 'spesaUser'@'localhost';
+CREATE USER 'spesaUser'@'localhost' IDENTIFIED BY 'spesaPwd';
+GRANT select,insert,update,delete,execute ON appSpesaDB.* TO 'spesaUser'@'localhost';
 
 DROP TABLE IF EXISTS marca;
 CREATE TABLE marca (
@@ -89,6 +89,9 @@ CREATE TRIGGER marca_capitalize_first BEFORE INSERT ON marca FOR EACH ROW
 BEGIN
 	SET NEW.nome = capitalize(NEW.nome);
 END$$
+
+INSERT nome INTO marca VALUES 'Barilla', 'De Cecco', 'Scharr';
+
 
 DELIMITER ;
 
